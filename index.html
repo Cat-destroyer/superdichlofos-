@@ -367,6 +367,32 @@ img.mkc{display:block;width:100%;height:100%;object-fit:contain;pointer-events:n
 .mkwrap{position:absolute;inset:0;pointer-events:none}
 img.mkc.on{position:absolute;max-width:none;object-fit:fill}
 .act.on i.note{color:var(--ink)}
+
+/* Сочетания по уровням */
+.mchip.ct1{background:#d9d2bd}.mchip.ct2{background:#2f7fc4;color:#fff}.mchip.ct3{background:#7d4fc4;color:#fff}.mchip.ct4{background:#f2bb16;color:var(--ink);box-shadow:0 0 0 1.5px var(--ink)}
+.mline.ctier{border-left:5px solid #b8b09a}.mline.ct2{border-left-color:#2f7fc4}.mline.ct3{border-left-color:#7d4fc4}.mline.ct4{border-left-color:#f2bb16}
+.mline.hint{font-style:italic}
+h3.ctierh.ct2{color:#7fb8ec}h3.ctierh.ct3{color:#c3a2f2}h3.ctierh.ct4{color:#f2bb16}
+.card.sup.ct2{border-color:#4aa3e8}.card.sup.ct3{border-color:#b07cf0}.card.sup.ct4{border-color:#f2bb16;box-shadow:0 0 0 3px rgba(242,187,22,.35)}
+.card.sup .plus{color:#a8dc8c}.card.sup .minus{color:#f4a3a0}
+
+/* Обучение: подсветка терминала */
+#coach{position:absolute;inset:0;z-index:50;pointer-events:none;overflow:hidden}
+#coach.nohole{background:rgba(7,14,12,.68)}
+#coach.nohole .ck-hole{display:none}
+.ck-blk{position:absolute;pointer-events:auto}
+.ck-hole{position:absolute;border-radius:10px;box-shadow:0 0 0 3000px rgba(7,14,12,.68);outline:3px solid var(--dichlor);pointer-events:none;animation:ckpulse 1.3s ease-in-out infinite}
+@keyframes ckpulse{50%{outline-color:rgba(242,187,22,.25)}}
+.ck-bub{position:absolute;left:12px;right:12px;pointer-events:auto;background:var(--ink);border:2.5px solid var(--dichlor);border-radius:var(--cut);padding:11px 12px 8px;box-shadow:0 5px 0 rgba(0,0,0,.4)}
+.ck-t{font:400 14px/1.45 var(--f-term);color:var(--bone);text-wrap:pretty}
+.ck-t::before{content:"ТЕРМИНАЛ> ";color:var(--dichlor)}
+.ck-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px}
+.ck-skip{font-size:12.5px;color:var(--bone-dim);text-decoration:underline;text-underline-offset:2px;min-height:40px;padding:0 4px 0 0;text-align:left}
+.ck-go{min-height:42px;padding:6px 18px;flex:none}
+.tutsw{flex-direction:column;gap:2px}
+.tutsw b{color:var(--dichlor)}
+.tutsw[aria-pressed="false"] b{color:var(--bone-dim)}
+@media (prefers-reduced-motion:reduce){.ck-hole{animation:none}}
 </style>
 </head>
 <body>
@@ -523,61 +549,91 @@ const relMul=r=>r>0?.7:r<0?1.3:1;
 
 /* Скрытые сочетания: двух мутаций или класса и мутации */
 const anyWings=h=>h('wings')||h('falcon');
+const WINGS=['wings','falcon'];
+const COMBO_TIER=['','Обычное','Редкое','Эпическое','Легендарное'];
+const COMBO_TIERS=['','Обычные','Редкие','Эпические','Легендарные'];
 const COMBOS=[
-  /* Бафф + бафф */
-  {id:'hornet',name:'Шершень',text:'Жало больше не грозит падением.',tags:['safeSting'],need:h=>h('sting')&&anyWings(h)},
-  {id:'locust',name:'Саранча',text:'Прыжок кузнечика достаёт на 6 клеток.',tags:['longHop'],need:h=>h('hopper')&&anyWings(h)},
-  {id:'kraken',name:'Летающий кракен',text:'Притягивает с 4 клеток, и цель падает с высоты: +2 урона.',tags:['kraken'],need:h=>h('tentacles')&&anyWings(h)},
-  {id:'girafant',name:'Слонораф',text:'Хобот достаёт на 4 клетки.',tags:['longTrunk'],need:h=>h('neck')&&h('trunk')},
-  {id:'battering',name:'Ходячий таран',text:'Таран отбрасывает цель на 3 клетки.',tags:['bigRam'],need:h=>h('rhinohorn')&&h('ramhorns')},
-  {id:'mortgage',name:'Ипотека',text:'Два дома на спине: спрятавшись, он вообще не получает урон.',tags:['fullHide'],need:h=>h('tshell')&&h('snailshell')},
-  {id:'lionheart',name:'Львиное сердце',text:'Три сердца поднимают на полном здоровье.',tags:['fullRevive'],need:h=>h('hearts')&&h('mane')},
-  {id:'beaverhelm',name:'Бобёр в каске',text:'Скорлупа отрастает раз в 3 хода.',tags:['coconutRegen'],need:h=>h('coconut')&&h('webbed')},
-  {id:'nightsniper',name:'Ночной снайпер',text:'Нос и совиные глаза больше не промахиваются.',tags:['noMiss'],need:h=>h('platynose')&&h('owleyes')},
-  {id:'clawrun',name:'Когти на разгоне',text:'+2 урона, если перед ударом пробежал 3 клетки.',tags:['clawrun'],need:h=>h('cheetah')&&h('bearclaws')},
-  /* Бафф + дебафф: спасение */
-  {id:'bait',name:'Приманка',text:'Враги идут на свет, а скорлупа держит 3 удара.',tags:['coconut3'],need:h=>h('coconut')&&h('lantern')},
-  {id:'airship',name:'Дирижабль',text:'Брюхо поднялось в воздух: штраф к ходу исчез, ещё +3 ОЗ.',s:{mov:1,hp:3},need:h=>anyWings(h)&&h('termite')},
-  {id:'bigbug',name:'Гигантская божья коровка',text:'Панцирь в пятнах выглядит несъедобным: враги больше не выбирают его первым.',rm:['taunt'],need:h=>h('tshell')&&h('ladybug')},
-  {id:'twonoses',name:'Два носа',text:'Бьёт любую цель, ещё +1 атака.',rm:['nearestOnly'],s:{atk:1},need:h=>h('platynose')&&h('starnose')},
-  {id:'bonesoup',name:'Суп из костей',text:'Хоботок пьёт то, что разгрызла пасть: штраф к атаке исчез.',s:{atk:1},need:h=>h('hyena')&&h('proboscis')},
-  {id:'flippers',name:'Ласты',text:'Перепонки несут улиточную ногу: штраф к ходу исчез.',s:{mov:1},need:h=>h('webbed')&&h('slugfoot')},
-  /* Бафф + дебафф: подстава */
-  {id:'crosseyed',bad:true,name:'Глаза разбежались',text:'40% промах: совиные глаза и мушиные не договорились.',tags:['miss40'],need:h=>h('owleyes')&&h('flyeyes')},
-  {id:'snailcheetah',bad:true,name:'Гепард-улитка',text:'Вся скорость пропала: бонус лап гепарда не действует.',s:{mov:-2},need:h=>h('cheetah')&&h('slugfoot')},
-  {id:'xmas',bad:true,name:'Новогодняя ёлка',text:'Все враги бьют только его.',tags:['bigTaunt'],need:h=>h('lantern')&&h('ladybug')},
-  {id:'stuck',bad:true,name:'Застрял',text:'Брюхо не влезает в панцирь: ход всегда 1.',set:{mov:1},need:h=>h('tshell')&&h('termite')},
-  /* Дебафф + дебафф */
-  {id:'panorama',name:'Панорама',text:'Глаза наконец договорились: промахов нет, +1 к дальности дальних атак.',rm:['miss25'],tags:['eyes5'],need:h=>h('flyeyes')&&h('chameyes')},
-  {id:'flyhappy',name:'Мушиное счастье',text:'Комары слетаются на кубики и никого не кусают.',tags:['noBite'],need:h=>h('cubes')&&h('flyeyes')},
-  {id:'nosebash',name:'Бьёт носом',text:'Ручки не нужны: +2 атака.',s:{atk:2},need:h=>h('trexarms')&&h('starnose')},
-  {id:'flowerbed',name:'Клумба',text:'Враги принимают его за цветок и не трогают, пока есть другие цели. Но атака всегда 1.',rm:['taunt'],tags:['stench'],set:{atk:1},need:h=>h('proboscis')&&h('ladybug')},
-  {id:'nofight',bad:true,name:'Нечем драться',text:'Атака всегда 1.',set:{atk:1},need:h=>h('trexarms')&&h('proboscis')},
-  {id:'walktarget',bad:true,name:'Ходячая мишень',text:'Все враги бьют только его.',tags:['bigTaunt'],need:h=>h('neck')&&h('ladybug')},
-  {id:'traffic',bad:true,name:'Вечная пробка',text:'Кубик появляется каждый ход.',tags:['cubesFast'],need:h=>h('slugfoot')&&h('cubes')},
-  {id:'sofa',bad:true,name:'Диван',text:'Ход всегда 1.',set:{mov:1},need:h=>h('termite')&&h('slugfoot')},
-  /* Классы */
-  {id:'fortress',name:'Живая крепость',text:'Панцирь на медоеде гасит 2 урона с каждого удара.',tags:['armor2'],need:(h,c,r)=>r==='medoed'&&h('tshell')},
-  {id:'cocoplate',name:'Панцирь из кокоса',text:'Скорлупа держит 3 удара.',tags:['coconut3'],need:(h,c,r)=>r==='medoed'&&h('coconut')},
-  {id:'rage',bad:true,name:'Ярость',text:'Пасть акулы будит зверя: +1 атака, но черта «Всё равно» больше не работает.',s:{atk:1},rm:['ignoreFirst','poisonResist'],need:(h,c,r)=>r==='medoed'&&h('shark')},
-  {id:'nostingfear',name:'Плевать на жало',text:'Медоед разоряет ульи и жал не боится: падения больше нет.',tags:['safeSting'],need:(h,c,r)=>r==='medoed'&&h('sting')},
-  {id:'dontcare',name:'Всё равно',text:'Кубики вомбата? Медоеду всё равно: они не появляются.',tags:['noCubes'],need:(h,c,r)=>r==='medoed'&&h('cubes')},
-  {id:'vegan',bad:true,name:'Вегетарианец',text:'С коровьим брюхом падаль не лезет: добивание лечит только 1 ОЗ.',tags:['weakScav'],need:(h,c,r)=>r==='jackal'&&h('cowbelly')},
-  {id:'longarms',name:'Длинные руки',text:'Щупальца больше не отнимают ход.',s:{mov:1},need:(h,c,r)=>r==='jackal'&&h('tentacles')},
-  {id:'alpha',name:'Альфа',text:'Каждое добивание даёт +1 атаку до конца боя.',tags:['alphaKill'],need:(h,c,r)=>r==='jackal'&&h('bearclaws')},
-  {id:'stingscav',name:'Падальщик с жалом',text:'Добивание лечит 6 ОЗ.',tags:['bigScav'],need:(h,c,r)=>r==='jackal'&&h('sting')},
-  {id:'sniffweak',name:'Нюх на слабых',text:'+1 урон по раненой цели.',tags:['sniffWounded'],need:(h,c,r)=>r==='jackal'&&h('platynose')},
-  {id:'camelgiraffe',name:'Верблюжираф',text:'Две шеи лучше одной: ещё +1 к дальности.',s:{range:1},need:(h,c,r)=>r==='camel'&&h('neck')},
-  {id:'inkspit',name:'Чернильный плевок',text:'Дальняя атака ещё и ослепляет цель.',tags:['inkSpit'],need:(h,c,r)=>r==='camel'&&h('inksac')},
-  {id:'toothspit',bad:true,name:'Зубастый плевок',text:'Плевок с зубами: ещё +1 атака, но дальность на 1 меньше.',s:{atk:1,range:-1},need:(h,c,r)=>r==='camel'&&h('hyena')},
-  {id:'bomber',name:'Бомбардировщик',text:'Дальняя атака бьёт по площади. Своих тоже.',tags:['splash'],need:(h,c,r)=>r==='camel'&&anyWings(h)},
-  {id:'twofat',name:'Два запаса жира',text:'Между боями лечит 6 ОЗ вместо 3.',tags:['bigHump'],need:(h,c,r)=>r==='camel'&&h('cowbelly')},
-  {id:'trumpet',name:'Кукарек в хобот',text:'Кукарек и Подъём достают на 2 клетки дальше.',tags:['longCrow'],need:(h,c,r)=>r==='rooster'&&h('trunk')},
-  {id:'inkcrow',name:'Чернильный кукарек',text:'Кукарек ещё и слепит соседних врагов.',tags:['inkCrow'],need:(h,c,r)=>r==='rooster'&&h('inksac')},
-  {id:'fightcock',bad:true,name:'Боевой петух',text:'Забыл все заклинания, зато +2 атака.',s:{atk:2},rmAbil:['crow','rally'],need:(h,c,r)=>r==='rooster'&&(h('bearclaws')||h('hyena')||h('shark'))},
-  {id:'finally',name:'Наконец-то летает',text:'Заклинания петуха достают на 2 клетки дальше.',tags:['longCrow'],need:(h,c,r)=>r==='rooster'&&anyWings(h)},
-  {id:'roosteregg',name:'Петух снёс яйцо',text:'Петухи яиц не несут, но этот снёс: детёныш вылупляется сразу, и ход не пропадает.',tags:['fastEgg'],need:(h,c,r)=>r==='rooster'&&h('eggm')},
+  /* Слияния: две мутации на одном месте тела срастаются в одну новую часть */
+  {id:'tinyclaws',fuse:'передние лапы',name:'Маленькие, но острые',req:['trexarms','bearclaws'],plus:'Ручки короткие, зато когти острые: +2 атака',minus:'Всё время режется о свои когти: −2 ОЗ',s:{atk:2,hp:-2}},
+  {id:'panorama',fuse:'глаза',name:'Панорама',req:['flyeyes','chameyes'],plus:'Глаза договорились: промахов нет, +1 к дальности дальних атак',minus:'Голова кружится от такого вида: −1 ход',rm:['miss25'],tags:['eyes5'],s:{mov:-1}},
+  {id:'flippers',fuse:'ноги',name:'Ласты',req:['webbed','slugfoot'],plus:'Перепонки несут улиточную ногу: штраф к ходу исчез',minus:'Ласты мокрые: на клетке, с которой ушёл, остаётся лужа',s:{mov:1},tags:['puddleTrail']},
+  {id:'pajama',fuse:'шкура',name:'Пижама',req:['zebra','ladybug'],plus:'Враги путаются в полосках и пятнах: 15% ударов по нему мимо',minus:'В пижаме всё время хочется спать: −2 инициатива',tags:['dodge'],s:{init:-2}},
+  {id:'plunger',fuse:'лоб',name:'Вантуз',req:['ramhorns','suckers'],plus:'Бодает и присасывается: отброшенная обычной атакой цель следующий ход не ходит',minus:'Лоб липкий: после такого удара сам прилипает на ход',tags:['plunger']},
+  {id:'hookarms',fuse:'передние лапы',name:'Щупальца кракена',req:['tentacles','bearclaws'],plus:'Когти на щупальцах: «Притянуть» бьёт на силу атаки, и цель 2 хода не может уйти и кровоточит',minus:'Крючья держат и его: следующий ход сам не сходит с места',tags:['hookPull']},
+  {id:'twonoses',fuse:'нос',name:'Два носа',req:['platynose','starnose'],plus:'Звезда на утином клюве: бьёт любую цель, +1 атака',minus:'Щекотно: чихает и мажет в 15% ударов',rm:['nearestOnly'],s:{atk:1},tags:['miss15']},
+  {id:'cobraffe',fuse:'шея',name:'Кобрафа',req:['neck','cobra'],plus:'Капюшон на всю шею: раздувшись, отбрасывает и слепит врагов в 2 клетках',minus:'Шея тяжёлая: −2 ОЗ',tags:['cobra2'],s:{hp:-2}},
+  {id:'dairy',fuse:'брюхо',name:'Молочная ферма',req:['cowbelly','udder'],plus:'Молоко лечит 5 ОЗ и больше не отнимает его ОЗ',minus:'Брюхо с выменем тяжёлое: −1 ход',tags:['milkPlus'],s:{mov:-1}},
+  {id:'stag',fuse:'лоб',name:'Рогач',req:['ramhorns','beetlehorn'],plus:'Перекинутая через спину цель бьётся о землю: ещё +2 урона',minus:'Рога перевешивают: 15% промах',tags:['flipSlam','miss15']},
+  {id:'crosseyed',fuse:'глаза',name:'Глаза разбежались',req:['owleyes','flyeyes'],plus:'Совиный глаз находит слабые места: шанс крита +20%',minus:'Но с мушиным не договорился: 40% промах',s:{crit:.2},tags:['miss40']},
+  {id:'mortgage',fuse:'спина',name:'Ипотека',req:['tshell','snailshell'],plus:'Два дома на спине: спрятавшись, вообще не получает урон',minus:'Из двух домов вылезает долго: после пряток следующий ход стоит на месте',tags:['fullHide','hideLock']},
+  {id:'hedgehelm',fuse:'спина',name:'Ёж в каске',req:['tshell','quills'],plus:'Иглы торчат из панциря: кто бьёт в упор, получает 3 урона, а союзники рядом больше не колются',minus:'Если его отбросить, падает на спину и пропускает ход',tags:['quills3','quillsSafe','flipStun']},
+  {id:'grinder',fuse:'пасть',name:'Мясорубка',req:['hyena','shark'],plus:'Два ряда зубов: каждый удар вызывает кровотечение на 2 хода',minus:'После добивания жуёт уже 2 хода',tags:['ripper','chewLong']},
+  {id:'doublesting',fuse:'хвост',name:'Двойное жало',req:['scorpion','sting'],plus:'Скорпионий хвост с пчелиным жалом: «Ужалить» достаёт на 3 клетки, а жало больше не грозит падением',minus:'Хвост тяжёлый: −1 ход',tags:['scorpLong','safeSting'],s:{mov:-1}},
+  /* Обычные пары */
+  {id:'beaverhelm',name:'Бобёр в каске',req:['coconut','webbed'],plus:'Скорлупа отрастает раз в 3 хода',minus:'Бобёр не боец: −1 атака',tags:['coconutRegen'],s:{atk:-1}},
+  {id:'clawrun',name:'Когти на разгоне',req:['cheetah','bearclaws'],plus:'+2 урона, если перед ударом пробежал 3 клетки',minus:'Без разбега бьёт на 1 слабее',tags:['clawrun','needRun']},
+  {id:'bait',name:'Приманка',req:['coconut','lantern'],plus:'Скорлупа держит 3 удара',minus:'Тащит на себе фонарь и скорлупу: −1 ход',tags:['coconut3'],s:{mov:-1}},
+  {id:'bonesoup',name:'Суп из костей',req:['hyena','proboscis'],plus:'Хоботок пьёт то, что разгрызла пасть: штраф к атаке исчез',minus:'Суп из чего попало: каждое добивание +3 токсина',s:{atk:1},tags:['soupTox']},
+  {id:'snailcheetah',name:'Гепард-улитка',req:['cheetah','slugfoot'],plus:'Скользит на брюхе: лужи не вредят, и его нельзя отбросить',minus:'Вся скорость пропала: −2 хода',tags:['poolSafe','noPush'],s:{mov:-2}},
+  {id:'xmas',name:'Новогодняя ёлка',req:['lantern','ladybug'],plus:'Светится и радует: соседние союзники бьют на 1 сильнее',minus:'Все враги бьют только его',tags:['leader','bigTaunt']},
+  {id:'nosebash',name:'Бьёт носом',req:['trexarms','starnose'],plus:'Ручки не нужны: +2 атака',minus:'Бьёт носом наугад: 15% промах',s:{atk:2},tags:['miss15']},
+  {id:'flowerbed',name:'Клумба',req:['proboscis','ladybug'],plus:'Враги принимают его за цветок и не трогают, пока есть другие цели',minus:'Но и бьёт как цветок: атака всегда 1',rm:['taunt'],tags:['stench'],set:{atk:1}},
+  {id:'nofight',name:'Нечем драться',req:['trexarms','proboscis'],plus:'Зато удирать: +2 хода',minus:'Атака всегда 1',s:{mov:2},set:{atk:1}},
+  {id:'sofa',name:'Диван',req:['termite','slugfoot'],plus:'Лежит и отдыхает: каждый ход лечит 1 ОЗ',minus:'Ход всегда 1',tags:['regen'],set:{mov:1}},
+  {id:'doe',name:'Лань',req:['hoofs','hareears'],plus:'Лёгкая на ногу: ещё +1 ход',minus:'Пугливая: −1 атака',s:{mov:1,atk:-1}},
+  {id:'bullcalf',name:'Бычок',req:['cowbelly','ramhorns'],plus:'Обычная атака отбрасывает на 2 клетки',minus:'Упрямый: −1 ход',tags:['push2'],s:{mov:-1}},
+  {id:'almostzebra',name:'Почти зебра',req:['zebra','hoofs'],plus:'Копыта и полоски: ещё +1 ход',minus:'Стадное животное: без союзника рядом бьёт на 1 слабее',s:{mov:1},tags:['herd']},
+  {id:'cow',name:'Корова',req:['hoofs','cowbelly'],plus:'Щиплет травку: между боями лечит 3 ОЗ',minus:'Медленная: −1 ход',tags:['grazer'],s:{mov:-1}},
+  {id:'aristocrat',name:'Вампир-аристократ',req:['blueblood','suckers'],plus:'Присосавшись, пьёт у соседа 2 ОЗ',minus:'Голубая кровь брезгует: консервы не ест',tags:['suckDrain','noCan']},
+  {id:'cocosnail',name:'Кокосовая улитка',req:['coconut','slugfoot'],plus:'Скорлупа держит 3 удара',minus:'Неуклюжая: −1 атака',tags:['coconut3'],s:{atk:-1}},
+  {id:'realsnail',name:'Настоящая улитка',req:['snailhorns','slugfoot'],plus:'Оставляет слизь: по ней все ходят вдвое дальше',minus:'Улитки не спешат: ещё −1 ход',tags:['slimeTrail'],s:{mov:-1}},
+  {id:'kingtrash',name:'Царь помойки',req:['mane','hyena'],plus:'Добив врага, рычит: соседние враги на ход убегают',minus:'Царь сам не охотится: −1 атака',tags:['killFear'],s:{atk:-1}},
+  {id:'scavenger',name:'Падальщик',req:['hyena','cheetah'],plus:'+1 урон по раненой цели',minus:'Худой и вечно голодный: −1 ОЗ',tags:['sniffWounded'],s:{hp:-1}},
+  {id:'housefly',name:'Муха',req:['flyeyes','proboscis'],plus:'Ловит комаров через клетку',minus:'Отвлекается на всё подряд: −2 инициатива',tags:['longCatch'],s:{init:-2}},
+  {id:'diver',name:'Звездонос-водолаз',req:['starnose','webbed'],plus:'Стоя в луже, в начале хода лечит 2 ОЗ',minus:'На суше нос сохнет: −1 атака',tags:['poolHeal'],s:{atk:-1}},
+  /* Редкие и эпические пары */
+  {id:'locust',name:'Саранча',req:['hopper',WINGS],plus:'Прыжок кузнечика достаёт на 6 клеток',minus:'Лёгкое полое тело: −2 ОЗ',tags:['longHop'],s:{hp:-2}},
+  {id:'kraken',name:'Летучий кальмар',req:['tentacles',WINGS],plus:'Притягивает с 4 клеток, и цель падает с высоты: +2 урона',minus:'Щупальца путаются в крыльях: −2 ОЗ',tags:['kraken'],s:{hp:-2}},
+  {id:'girafant',name:'Слонораф',req:['neck','trunk'],plus:'Хобот достаёт на 4 клетки',minus:'Шея с хоботом перевешивает: −1 ход',tags:['longTrunk'],s:{mov:-1}},
+  {id:'nightsniper',name:'Ночной снайпер',req:['platynose','owleyes'],plus:'Нос и совиные глаза больше не промахиваются',minus:'Днём сонный: −2 инициатива',tags:['noMiss'],s:{init:-2}},
+  {id:'airship',name:'Дирижабль',req:[WINGS,'termite'],plus:'Брюхо поднялось в воздух: штраф к ходу исчез, ещё +3 ОЗ',minus:'Дирижабль не боец: −1 атака',s:{mov:1,hp:3,atk:-1}},
+  {id:'flyhappy',name:'Мушиное счастье',req:['cubes','flyeyes'],plus:'Мухи облепили кубики: комары его не кусают',minus:'Мухи кружат и отвлекают: −2 инициатива',tags:['noBite'],s:{init:-2}},
+  {id:'walktarget',name:'Ходячая мишень',req:['neck','ladybug'],plus:'Мишень должна быть крепкой: +5 ОЗ',minus:'Все враги бьют только его',tags:['bigTaunt'],s:{hp:5}},
+  {id:'traffic',name:'Вечная пробка',req:['slugfoot','cubes'],plus:'Слизь смазывает: штраф ноги улитки к ходу исчез',minus:'Кубик появляется каждый ход',tags:['cubesFast'],s:{mov:1}},
+  {id:'reallion',name:'Настоящий лев',req:['lionjaw','mane'],plus:'Рявк достаёт на 3 клетки, ещё +2 ОЗ',minus:'Лев много спит: −1 ход',tags:['roar3'],s:{hp:2,mov:-1}},
+  {id:'disco',name:'Дискотека',req:['peacock','flyeyes'],plus:'Распустив хвост, ещё и слепит врагов на ход',minus:'Сам ослеплён блеском: 40% промах',tags:['peacockBlind','miss40']},
+  {id:'pelicanfeet',name:'Пеликан',req:['pelican','webbed'],plus:'Выплёвывает проглоченного на 4 клетки',minus:'Мешок полон воды: −2 ОЗ',tags:['spit4'],s:{hp:-2}},
+  {id:'nursery',name:'Ясли',req:['udder','termite'],plus:'Термиты сытые: рождаются с 3 ОЗ',minus:'Каждый новый термит отнимает у него 1 ОЗ',tags:['fatTermites']},
+  {id:'hornet',name:'Шершень',req:['sting',WINGS],plus:'Жало больше не грозит падением',minus:'Громко жужжит: враги бьют его первым',tags:['safeSting','taunt']},
+  {id:'battering',name:'Ходячий таран',req:['rhinohorn','ramhorns'],plus:'Таран отбрасывает цель на 3 клетки',minus:'Бьётся так, что у самого кружится голова: после тарана пропускает ход',tags:['bigRam','ramDizzy']},
+  {id:'lionheart',name:'Львиное сердце',req:['hearts','mane'],plus:'Три сердца поднимают на полном здоровье',minus:'Доброе сердце: −1 атака',tags:['fullRevive'],s:{atk:-1}},
+  {id:'bigbug',name:'Гигантская божья коровка',req:['tshell','ladybug'],plus:'Панцирь в пятнах выглядит несъедобным: враги больше не выбирают его первым',minus:'Если его отбросить, падает на спину и пропускает ход',rm:['taunt'],tags:['flipStun']},
+  {id:'stuck',name:'Застрял',req:['tshell','termite'],plus:'Сидит в панцире как в бункере: удары по нему на 2 слабее',minus:'Брюхо не влезает: ход всегда 1',tags:['armor2'],set:{mov:1}},
+  {id:'owlfalcon',name:'Сова-сокол',req:['falcon','owleyes'],plus:'Пике всегда критическое',minus:'Лёгкие кости: ещё −2 ОЗ',tags:['diveCrit'],s:{hp:-2}},
+  {id:'fullcham',name:'Хамелеон целиком',req:['tongue','chameyes'],plus:'Язык больше не отнимает следующий ход',minus:'Язык длиннее тела: −1 ход',tags:['tongueFree'],s:{mov:-1}},
+  /* С классом: собрать проще всего, поэтому их немного */
+  {id:'alpha',race:'jackal',name:'Альфа',req:['bearclaws'],plus:'Каждое добивание даёт +1 атаку до конца боя',minus:'Пока никого не добил, бьёт на 1 слабее',tags:['alphaKill'],s:{atk:-1}},
+  {id:'vegan',race:'jackal',name:'Вегетарианец',req:['cowbelly'],plus:'Щиплет травку: между боями лечит 3 ОЗ',minus:'Падаль не лезет: добивание лечит только 1 ОЗ',tags:['weakScav','grazer']},
+  {id:'dontcare',race:'medoed',name:'Всё равно',req:['cubes'],plus:'Кубики вомбата? Медоеду всё равно: они не появляются',minus:'И спешить ему тоже всё равно: −2 инициатива',tags:['noCubes'],s:{init:-2}},
+  {id:'rage',race:'medoed',name:'Ярость',req:['shark'],plus:'Пасть акулы будит зверя: +1 атака',minus:'Черта «Всё равно» больше не работает',s:{atk:1},rm:['ignoreFirst','poisonResist']},
+  {id:'toothspit',race:'camel',name:'Зубастый плевок',req:['hyena'],plus:'Плевок с зубами: +1 атака',minus:'Дальность на 1 меньше',s:{atk:1,range:-1}},
+  {id:'bomber',race:'camel',name:'Бомбардировщик',req:[WINGS],plus:'Дальняя атака бьёт по площади',minus:'Своих рядом с целью тоже задевает',tags:['splash']},
+  {id:'fightcock',race:'rooster',name:'Боевой петух',req:[['bearclaws','hyena','shark']],plus:'+2 атака',minus:'Забыл все заклинания',s:{atk:2},rmAbil:['crow','rally']},
+  {id:'roosteregg',race:'rooster',name:'Петух снёс яйцо',req:['eggm'],plus:'Детёныш вылупляется сразу, и ход не пропадает',minus:'Петухам такое даётся тяжело: −2 ОЗ',tags:['fastEgg'],s:{hp:-2}},
+  /* Легендарные: по одному на каждую кровь */
+  {id:'mammoth',name:'Мамонт',req:['trunk','rhinoskin','rhinohorn','hoofs'],plus:'+6 ОЗ, таран бьёт каждого, кто стоит между ним и целью',minus:'Огромный: ход всегда 2',tags:['stomp'],s:{hp:6},set:{mov:2}},
+  {id:'krakenl',name:'Кракен',req:['tentacles','suckers','hearts','inksac'],plus:'«Притянуть» достаёт на 5 клеток и бьёт на силу атаки, чернила не слепят своих, +4 ОЗ',minus:'На суше задыхается: в начале хода −1 ОЗ, если не стоит в луже',tags:['krakenPull','inkSafe','dryGasp'],s:{hp:4}},
+  {id:'manticore',name:'Мантикора',req:['mane','lionjaw','scorpion','falcon'],plus:'Лев с крыльями и хвостом скорпиона: +2 атака, пике отравляет, «Ужалить» достаёт на 3 клетки',minus:'Легенду видно издалека: все враги бьют только его',tags:['diveVenom','scorpLong','bigTaunt'],s:{atk:2}},
+  {id:'swarmqueen',name:'Королева роя',req:[WINGS,'sting','flyeyes','termite'],plus:'Каждый ход рождает термита, их может быть до 3',minus:'Брюхо огромное: ход всегда 1',tags:['termiteQueen'],set:{mov:1}},
+  {id:'discoball',name:'Диско-шар',req:['peacock','lantern','chameyes','tongue'],plus:'Распустив хвост, слепит врагов в 3 клетках на 2 хода, а фонарь ловит комаров через 3 клетки',minus:'Звезда вечеринки: все враги бьют только его',tags:['peacockBlind2','longerCatch','bigTaunt']},
 ];
+const reqTier=q=>Array.isArray(q)?Math.min(...q.map(id=>MUT[id].t)):MUT[q].t;
+COMBOS.forEach(c=>{
+  c.need=(h,cs,r)=>(!c.race||r===c.race)&&c.req.every(q=>Array.isArray(q)?q.some(id=>h(id)):h(q));
+  const top=Math.max(1,...c.req.map(reqTier));
+  c.tier=c.req.length>=4?4:(top===3||c.req.length===3)?3:top===2?2:1;
+  c.text=`${c.plus}. ${c.minus}.`;
+});
 const COMBO=Object.fromEntries(COMBOS.map(c=>[c.id,c]));
 
 /* Побочки укусов и травмы из боя. Всё это дебаффы. */
@@ -1149,13 +1205,39 @@ const BIT={
 const BEES=[[18,20],[34,10],[86,14],[8,44]].map(([x,y])=>`<g transform="translate(${x} ${y})"><ellipse cx="-1" cy="-3" rx="2.2" ry="3.2" fill="#d6ecec" stroke="#17140f" stroke-width=".8"/><ellipse rx="3.6" ry="2.5" fill="#f2bb16" stroke="#17140f" stroke-width="1"/><path d="M-1 -2.3V2.3M1.2 -2.2V2.2" stroke="#17140f" stroke-width="1"/></g>`).join('');
 const SHAPE={herb:[1.07,.97],moll:[1.02,.95],insect:[.95,1.04],pred:[1.05,1.03],weird:[.98,1.03]};
 let skinUid=0;
+/* Слияния: две мутации на одном месте тела рисуются одной новой частью */
+const CT_COL=['','#ece4cf','#4aa3e8','#b07cf0','#f2bb16'];
+const clawTip=(x,y)=>`<path d="M${x} ${y-2}l7 -4l-2 5zM${x+1} ${y}l8 0l-4 3zM${x} ${y+2}l7 4l-4 -1z" fill="#f1e7c9" ${th}/>`;
+const facets=(x,y)=>`<path d="M${x-4} ${y-4}L${x+4} ${y+4}M${x+4} ${y-4}L${x-4} ${y+4}M${x-5} ${y}H${x+5}M${x} ${y-5}V${y+5}" stroke="#f29ab0" stroke-width="1"/>`;
+const ramPair=tube('M-5 3Q-24 -4 -21 -17Q-15 -24 -10 -16Q-10 -12 -14 -13','#c9b27c',5)+tube('M6 3Q24 -4 21 -17Q15 -24 10 -16Q10 -12 14 -13','#c9b27c',5);
+const tshellS=`<path d="M-27 7Q-25 -21 0 -21Q25 -21 27 7Z" fill="#5f8f3e" ${st}/><path d="M-15 5L-8 -11L8 -11L15 5M-8 -11L-4 -20M8 -11L4 -20M-22 -5L-8 -11M22 -5L8 -11" fill="none" ${th}/>`;
+const FUSE_ART={
+  tinyclaws:{a:'body',s:tube('M13 -3L22 1L26 -3','#6f9a3a',4)+tube('M13 5L21 9L25 5','#6f9a3a',4)+clawTip(27,-3)+clawTip(26,5)},
+  panorama:{a:'eye',s:`<circle cx="-6" r="8.5" fill="#7fb34a" ${st}/><ellipse cx="-7" rx="5" ry="5.5" fill="#b3263e" ${th}/>${facets(-7,0)}<circle cx="9" cy="-3" r="8.5" fill="#7fb34a" ${st}/><ellipse cx="11" cy="-3" rx="5" ry="5.5" fill="#b3263e" ${th}/>${facets(11,-3)}`},
+  flippers:{a:'foot',s:`<path d="M-36 6Q-34 -7 -20 -6L-8 6Z" fill="#e8842b" ${st}/><path d="M4 6Q6 -7 20 -6L32 6Z" fill="#e8842b" ${st}/><path d="M-26 5l2 -8M-17 5l0 -9M14 5l2 -8M23 5l0 -9" fill="none" ${th}/><ellipse cx="-40" cy="7" rx="5" ry="1.8" fill="#61c8e6" ${th}/>`},
+  pajama:{a:'body',s:`<path d="M-21 -9L-15 9M-9 -13L-4 12M3 -13L7 12M15 -10L20 8" stroke="${INK}" stroke-width="4" stroke-linecap="round"/><g fill="#e0405d" ${th}><circle cx="-12" cy="-2" r="3.2"/><circle cx="1" cy="5" r="3"/><circle cx="-3" cy="-8" r="2.6"/><circle cx="12" cy="-3" r="3"/></g>`},
+  plunger:{a:'head',s:ramPair+`<rect x="-1.8" y="-26" width="3.6" height="18" rx="1.4" fill="#c9a36b" ${th}/><path d="M-9 2Q-9 -10 0 -10Q9 -10 9 2Z" fill="#b3263e" ${st}/>`},
+  hookarms:{a:'belly',s:`<path d="M-18 -2Q-26 12 -14 22Q-12 12 -10 0Z" fill="${PK}" ${st}/><path d="M-4 0Q-8 16 2 24Q4 12 5 0Z" fill="${PK}" ${st}/><path d="M12 -2Q10 12 22 20Q22 10 20 -2Z" fill="${PK}" ${st}/>`+[[-14,22],[2,24],[22,20]].map(([x,y])=>`<path d="M${x} ${y}q-7 4 -9 -3" fill="none" stroke="${INK}" stroke-width="5.4" stroke-linecap="round"/><path d="M${x} ${y}q-7 4 -9 -3" fill="none" stroke="#f1e7c9" stroke-width="2.6" stroke-linecap="round"/>`).join('')+`<path d="M-17 8l-4 0M-3 10l-4 0M13 8l-3 1" stroke="#f1e7c9" stroke-width="2.4" stroke-linecap="round"/>`},
+  twonoses:{a:'mouth',s:`<path d="M-11 -7Q14 -13 25 -4Q27 5 14 7Q0 9 -11 6Z" fill="#6b5a3f" ${st}/><circle cx="5" cy="-4" r="1.6" fill="${INK}"/><circle cx="11" cy="-4" r="1.6" fill="${INK}"/><path d="M-9 1Q8 3 22 -1" fill="none" ${th}/><g transform="translate(9 -11) scale(.62)">${starRays}<circle r="4.4" fill="#d9648c" ${th}/></g>`},
+  cobraffe:{a:'back',b:1,s:`<g transform="translate(5 -20) scale(.8)"><path d="M-3 16Q-26 8 -20 -12Q-9 -26 2 -26Q15 -26 22 -10Q26 8 7 16Z" fill="#b08a3c" ${st}/><ellipse cx="-9" cy="-6" rx="5" ry="6.5" fill="#f1e7c9" ${th}/><circle cx="-9" cy="-6" r="2.2" fill="${INK}"/><ellipse cx="12" cy="-6" rx="5" ry="6.5" fill="#f1e7c9" ${th}/><circle cx="12" cy="-6" r="2.2" fill="${INK}"/></g><path d="M-7 4L1 -32L11 -32L9 4Z" fill="#f0c04a" ${st}/><path d="M-1 -6l5 -2l1 5l-5 1zM3 -20l5 -1l0 5l-5 0z" fill="#a4552a"/><ellipse cx="12" cy="-37" rx="10" ry="6.5" fill="#f0c04a" ${st}/><path d="M6 -43V-49M12 -43V-49" ${st} fill="none"/><circle cx="14" cy="-38" r="1.8" fill="${INK}"/>`},
+  dairy:{a:'belly',s:`<ellipse cy="-4" rx="20" ry="13" fill="#f7f1e2" ${st}/><ellipse cx="-8" cy="-7" rx="6" ry="4" fill="${INK}"/><ellipse cx="9" cy="-4" rx="5" ry="3.4" fill="${INK}"/><path d="M-11 5Q-12 18 0 18Q12 18 11 5Z" fill="#f29ab0" ${st}/><rect x="-8" y="15" width="4.2" height="8" rx="2.1" fill="#e0758f" ${th}/><rect x="-2" y="16" width="4.2" height="9" rx="2.1" fill="#e0758f" ${th}/><rect x="4" y="15" width="4.2" height="8" rx="2.1" fill="#e0758f" ${th}/>`},
+  stag:{a:'head',s:ramPair+`<path d="M-4 3Q-3 -16 5 -30L9 -22L15 -30Q15 -8 5 3Z" fill="#26222e" ${st}/>`},
+  crosseyed:{a:'eye',s:`<circle cx="-6" r="8.5" fill="#f2bb16" ${st}/><circle cx="-9" cy="-3" r="3.8" fill="${INK}"/><ellipse cx="9" rx="8" ry="9" fill="#b3263e" ${st}/>${facets(9,0)}<path d="M-15 -12L-3 -8M17 -14L5 -9" ${st} fill="none"/>`},
+  mortgage:{a:'back',s:tshellS+`<rect x="9" y="-38" width="4.6" height="9" fill="#a4552a" ${th}/><path d="M11 -40q-3 -3 1 -5q3 -2 1 -5" fill="none" stroke="#d6ecec" stroke-width="2.2" stroke-linecap="round"/><circle cx="0" cy="-27" r="11" fill="#c98f49" ${st}/><path d="M-1 -27a2.2 2.2 0 1 1 2.2 2.2a4.8 4.8 0 1 1 4.8 -4.8" fill="none" ${th}/>`},
+  hedgehelm:{a:'back',s:`<path d="M-23 3L-31 -22M-12 -3L-17 -31M-2 -5L-2 -35M8 -5L14 -31M18 1L28 -21" stroke="${INK}" stroke-width="5" stroke-linecap="round"/><path d="M-29 -17L-31 -22M-16 -25L-17 -31M-2 -29L-2 -35M13 -25L14 -31M26 -16L28 -21" stroke="#f1e7c9" stroke-width="3.4" stroke-linecap="round"/>`+tshellS},
+  grinder:{a:'mouth',s:`<path d="M-13 -13L16 -11Q27 0 16 11L-13 13Z" fill="#8d99a6"/><path d="M-13 1L22 1Q24 6 16 11L-13 13Z" fill="#7b6a4e"/><path d="M-13 -13L16 -11Q27 0 16 11L-13 13Z" fill="none" ${st}/><path d="M-10 -6l3 7l3 -7l3 7l3 -7l3 7l3 -7l2 6" fill="#fff" ${th}/><path d="M-10 8l3 -6l3 6l3 -6l3 6l3 -6l3 6l2 -5" fill="#fff" ${th}/>`},
+  doublesting:{a:'rear',b:1,s:tube('M5 3Q-16 5 -18 -14Q-18 -28 -6 -28','#8a4f24',8)+`<path d="M-17 -8l7 -1M-17 -17l7 1M-13 -25l5 4" stroke="#f2bb16" stroke-width="3"/><path d="M-7 -34L12 -28L-7 -22Z" fill="${INK}" ${th}/>`},
+};
+/* Звезда сочетания: цвет по самому высокому уровню */
+const comboStar=(cs,x,y)=>{const t=Math.max(0,...(cs||[]).map(i=>COMBO[i]?COMBO[i].tier:0));if(!t)return'';return `<path transform="translate(${x-90} ${y-2})" d="M90 2L93 10L101 11L95 16L97 24L90 20L83 24L85 16L79 11L87 10Z" fill="${CT_COL[t]}" stroke="${INK}" stroke-width="2" stroke-linejoin="round"/>`};
 function drawCreature(o,opts={}){
   if(o.race==='camel')return MarkerCamel.pic(o,opts);
   const key=RACES[o.race]?.art||o.race, B=BODIES[key]||BODIES.roach;
-  const ids=[...(o.muts||[]),...(o.debuffs||[])];
+  const fz=(o.combos||[]).filter(id=>FUSE_ART[id]&&COMBO[id]),hid=new Set(fz.flatMap(id=>COMBO[id].req));
+  const pieces=[...[...(o.muts||[]),...(o.debuffs||[])].filter(id=>!hid.has(id)).map(id=>ART[id]),...fz.map(id=>FUSE_ART[id])];
   let c=B.c,behind='',front='';const used={};
-  for(const id of ids){
-    const A=ART[id]; if(!A) continue;
+  for(const A of pieces){
+    if(!A) continue;
     if(A.tint) c=A.tint;
     const n=used[A.a]=(used[A.a]||0)+1, sh=(n-1)*7*(n%2?1:-1), pt=A.a==='foot'?(FOOT[key]||[50,86]):(B.a[A.a]||[50,50]);
     const piece=`<g transform="translate(${pt[0]+sh} ${pt[1]+(n>2?-3*(n-2):0)})">${A.s}</g>`;
@@ -1176,7 +1258,7 @@ function drawCreature(o,opts={}){
   /* Зверь растёт с уровнем, ноги остаются на месте */
   const lv=o.lvl||(o.pet&&o.pet.lvl)||0,k=lv?.84+.026*(Math.min(lv,10)-1):1,fy=(FOOT[key]||[50,86])[1];
   const grow=k===1&&fsx===1&&fsy===1?'':` transform="translate(50 ${fy}) scale(${(k*fsx).toFixed(3)} ${(k*fsy).toFixed(3)}) translate(-50 ${-fy})"`;
-  const cs=o.combos||[],mark=cs.length?(cs.some(i=>!COMBO[i]||!COMBO[i].bad)?`<path d="M90 2L93 10L101 11L95 16L97 24L90 20L83 24L85 16L79 11L87 10Z" fill="#f2bb16" ${th}/>`:`<circle cx="90" cy="12" r="8" fill="#26222e" ${th}/><path d="M86 8l8 8M94 8l-8 8" stroke="#e0405d" stroke-width="2.4"/>`):'';
+  const mark=comboStar(o.combos,90,2);
   const mood=opts.mood||(o.tox>=70?'tox':'');
   return `<svg viewBox="0 0 100 100" width="100%" height="100%" aria-hidden="true"><g${grow}>${behind}${B.d(c,mood)}${skin}${front}</g>${mark}</svg>`;
 }
@@ -1345,12 +1427,12 @@ const MarkerCamel=(()=>{
     );if(fangs)parts.push(tri(X(13),Y(4.5),3.8,8.5),tri(X(21),Y(4),3.8,8))}
     else{parts.push(
       {s:o([[-2,6],[12,3],[29,5],[31,24],[16,27],[0,18]]),c:'mouth',noline:1},
-      {s:o([[-5,8],[6,17],[20,24],[31,25,'c'],[27,31],[12,32],[-3,23]]),c:'base',id:'jaw',lw:.85},
+      {s:o([[-5,8],[6,17],[20,24],[31,25,'c'],[27,31],[12,32],[-3,23]]),c:mouth==='grinder'?'shark':'base',id:'jaw',lw:.85},
       tri(X(13),Y(24),4.6,-6.5),tri(X(20),Y(26),4.4,-6),tri(X(27),Y(26.5),4,-6.5),
       {s:o([[-10,0],[-8,-8],[-1,-11],[7,-10],[18,-7],[28,-3],[33,3,'c'],[27,6],[14,7],[3,8],[-7,7]]),c:'base',id:'head',lw:.9},
       {s:o([[27,-4],[34,-1],[33,3],[27,2]]),c:'nose',noline:1},
       tri(X(11),Y(6.8),4,5.6),tri(X(17),Y(6.8),fangs?6:5,fangs?13:9),tri(X(23.5),Y(6),fangs?6:4.6,fangs?12:7.4),tri(X(29),Y(5),3.4,5),
-    )}
+    );if(mouth==='grinder')parts.push(tri(X(9.5),Y(25),3.4,-5),tri(X(16.5),Y(26.8),3.4,-5),tri(X(23.5),Y(27.4),3.2,-5.4),tri(X(14),Y(6.8),3.4,6.4),tri(X(26),Y(5.6),3.2,6))}
     parts.push({eye:[X(3),Y(-3.5),4.2*k],look:[1.2,.5],mad},{line:o([[-2,-8],[3,-8.5],[9,-6]]),w:1.8},{line:o([[-1,-1],[-4,1]]),w:.9});
     if(sleepy)parts.push({s:o([[-1.6,-3.8],[0,-8.4],[3,-8.8],[6.4,-8],[7.6,-3.6],[3,-2.6]]),c:'base',lw:.7},{line:o([[-1.6,-3.6],[3,-2.6],[7.6,-3.4]]),w:1.1});
     return parts;
@@ -1389,11 +1471,11 @@ const MarkerCamel=(()=>{
   const anchors=(H,k)=>({head:[H[0],H[1]-8*k],eye:[H[0]+3*k,H[1]-3.5*k],mouth:[H[0]+22*k,H[1]+3*k],back:[46,22],rear:[15,50],belly:[44,66],body:[44,46],foot:[44,93]});
   const SLOT=new Set(['neck','cobra','hyena','lionjaw','proboscis','hopper','flealegs','mantisarms']);
   const baseFar='#b98a4c';
-  const PAL={base:'#d9ab6a',far:baseFar,hump:'#c9975a',tuft:'#6b4a2a',mouth:'#4a1620',nose:'#2a1a12',patch:'#8a5a2c',hood:'#8c6a3f',hoodIn:'#ecdba0',hoodD:'#2f2118',prob:'#e39a2c',fem:'#74a33a',femD:'#55802a',tib:'#5d8a2e',man:'#b9cb5c',manD:'#93a643',spine:'#2a2415',inner:'#a9764a',flea:'#6b3a1e',fleaD:'#4a2814',tiger:'#1d150f',sucker:'#e07a97',odd:'#6b3fa0'};
+  const PAL={base:'#d9ab6a',far:baseFar,hump:'#c9975a',tuft:'#6b4a2a',mouth:'#4a1620',nose:'#2a1a12',patch:'#8a5a2c',hood:'#8c6a3f',hoodIn:'#ecdba0',hoodD:'#2f2118',prob:'#e39a2c',fem:'#74a33a',femD:'#55802a',tib:'#5d8a2e',man:'#b9cb5c',manD:'#93a643',spine:'#2a2415',inner:'#a9764a',flea:'#6b3a1e',fleaD:'#4a2814',tiger:'#1d150f',sucker:'#e07a97',odd:'#6b3fa0',shark:'#8d99a6'};
 
   function build(o,form,mood){
     const mu=new Set(o.muts||[]);
-    const neck=mu.has('neck')?'giraffe':'base',n=NECK[neck],H=n.head,mouth=mu.has('hyena')||mu.has('lionjaw')?'hyena':'base',k=mouth==='base'?1:1.2;
+    const neck=mu.has('neck')?'giraffe':'base',n=NECK[neck],H=n.head,mouth=(o.combos||[]).includes('grinder')?'grinder':mu.has('hyena')||mu.has('lionjaw')?'hyena':'base',k=mouth==='base'?1:1.2;
     const sp=form&&form.sp,P=[];
     const hop=mu.has('hopper'),man=mu.has('mantisarms'),fl=mu.has('flealegs');
     /* Ноги блохи занимают свободную пару: задние, передние или встают посередине лишней парой */
@@ -1441,7 +1523,7 @@ const MarkerCamel=(()=>{
     const form=mainForm(o.race,o.muts);
     const spec=o.spec||(o.pet&&o.pet.spec)||'',lv=o.lvl||(o.pet&&o.pet.lvl)||0,mood=opts.mood||(o.tox>=70?'tox':''),cs=o.combos||[];
     const seed=1+[...String(o.name||'')].reduce((n,ch)=>n+ch.charCodeAt(0),0)%5;
-    const key=[[...(o.muts||[])].sort().join(),[...(o.debuffs||[])].sort().join(),spec,lv,mood,cs.length?(cs.some(i=>!COMBO[i]||!COMBO[i].bad)?'g':'b'):'',seed,opts.cell?1:0].join('|');
+    const key=[[...(o.muts||[])].sort().join(),[...(o.debuffs||[])].sort().join(),spec,lv,mood,[...cs].sort().join('+'),seed,opts.cell?1:0].join('|');
     if(cache.has(key))return cache.get(key);
     const B=build(o,form,mood),pal={...PAL};
     let tint=null;
@@ -1450,8 +1532,10 @@ const MarkerCamel=(()=>{
     if(form&&FORM_TINT[form.sp]){const[c,t]=FORM_TINT[form.sp];pal.base=mix(pal.base,c,t);pal.far=mix(pal.far,c,t);pal.hump=mix(pal.hump,c,t)}
     if(form&&form.sp==='insect'){pal.inner=mix(pal.inner,'#2a1a12',.4)}
     const A0=anchors(B.H,B.k);let behind='',front='';const used={};
-    for(const id of [...(o.muts||[]),...(o.debuffs||[])]){
-      if(SLOT.has(id))continue;const A=ART[id];if(!A)continue;
+    const fz=cs.filter(id=>FUSE_ART[id]&&COMBO[id]),hid=new Set(fz.flatMap(id=>COMBO[id].req));
+    const pcs=[...[...(o.muts||[]),...(o.debuffs||[])].filter(id=>!SLOT.has(id)&&!hid.has(id)).map(id=>ART[id]),...fz.filter(id=>!COMBO[id].req.some(r=>SLOT.has(r))).map(id=>FUSE_ART[id])];
+    for(const A of pcs){
+      if(!A)continue;
       const n=used[A.a]=(used[A.a]||0)+1,sh=(n-1)*7*(n%2?1:-1),pt=A0[A.a]||A0.body;
       const piece=`<g transform="translate(${n1(pt[0]+sh)} ${n1(pt[1]+(n>2?-3*(n-2):0))})">${A.s}</g>`;
       if(A.b)behind+=piece;else front+=piece;
@@ -1468,7 +1552,7 @@ const MarkerCamel=(()=>{
     const X=v=>52+(v-52)*sx,Y=v=>fy+(v-fy)*sy,pad=4;
     a=X(a)-pad;c=X(c)+pad;b=Y(b)-pad;d=Math.max(Y(d),fy+6)+pad;
     let mark='';
-    if(cs.length){const mx=c-24,my=b+3;mark=cs.some(i=>!COMBO[i]||!COMBO[i].bad)?`<path transform="translate(${n1(mx-79)} ${n1(my-2)})" d="M90 2L93 10L101 11L95 16L97 24L90 20L83 24L85 16L79 11L87 10Z" fill="#f2bb16" stroke="${LINE}" stroke-width="2" stroke-linejoin="round"/>`:`<g transform="translate(${n1(mx+11-90)} ${n1(my-2)})"><circle cx="90" cy="12" r="8" fill="#26222e" stroke="${LINE}" stroke-width="2"/><path d="M86 8l8 8M94 8l-8 8" stroke="#e0405d" stroke-width="2.4"/></g>`}
+    if(cs.length)mark=comboStar(cs,c-13,b+3);
     const vbw=c-a,vbh=d-b;
     const shadow=`<path d="M14 94q38 -7 76 0q-38 8 -76 0" fill="#1a150b" fill-opacity=".5"/>`;
     const inner=`<g transform="${tf}">${shadow}${behind}${paint(B.parts,pal,seed)}${front}</g>${mark}`;
@@ -1501,10 +1585,11 @@ const dist=(a,b)=>Math.abs(a.x-b.x)+Math.abs(a.y-b.y);
 
 /* ---------- Сохранение: в браузере сразу, в хранилище артефакта для вошедших ---------- */
 const SAVE_KEY='superdichlofos.v1';
-const SAVE_V=6;
-const NEW=()=>({v:SAVE_V,pets:[],grave:[],fugitives:[],food:12,water:1,mosq:1,cleared:0,seq:1,seen:{},retry:[],quizN:0,codexM:{},codexC:{},codexF:{},tut:{},tutDone:false,evSeen:{},evN:0,best:0,slide:null,pending:null,won:false,updated:0});
+const SAVE_V=7;
+const NEW=()=>({v:SAVE_V,pets:[],grave:[],fugitives:[],food:12,water:1,mosq:1,cleared:0,seq:1,seen:{},retry:[],quizN:0,codexM:{},codexC:{},codexF:{},tut:{},tutDone:false,tutor:null,evSeen:{},evN:0,best:0,slide:null,pending:null,won:false,updated:0});
 let G=NEW(),cloudRef=null,cloudTimer=0,cloudBusy=false,cloudDirty=false;
 function save(){
+  if(G.sandbox)return;
   G.updated=Date.now();
   G.best=Math.max(G.best,...G.pets.map(petScore),0);
   try{localStorage.setItem(SAVE_KEY,JSON.stringify(G))}catch(e){}
@@ -1533,14 +1618,16 @@ const oldHand=g=>(g.cleared||0)>0||(g.quizN||0)>0||(g.grave||[]).length>0;
 const GONE_MUT={firefly:'ladybug',flattail:'cowbelly'};
 function fixGone(g){
   const fix=p=>{p.muts=[...new Set((p.muts||[]).map(id=>GONE_MUT[id]||id))];p.combos=findCombos(p.race,p.muts);(p.muts||[]).forEach(id=>{if(g.codexM)g.codexM[id]=1});formsOf(p.race,p.muts).forEach(f=>{g.codexF=g.codexF||{};g.codexF[f.id]=1})};
-  (g.pets||[]).forEach(fix);(g.fugitives||[]).forEach(fix);(g.grave||[]).forEach(x=>{if(x.muts)x.muts=[...new Set(x.muts.map(id=>GONE_MUT[id]||id))]});
+  g.codexC=g.codexC||{};for(const k in g.codexC)if(!COMBO[k])delete g.codexC[k];
+  const keep=p=>(p.combos||[]).forEach(id=>{if(COMBO[id])g.codexC[id]=1});
+  (g.pets||[]).forEach(fix);(g.fugitives||[]).forEach(fix);(g.pets||[]).forEach(keep);(g.grave||[]).forEach(x=>{if(x.muts)x.muts=[...new Set(x.muts.map(id=>GONE_MUT[id]||id))]});
   if(g.codexM){delete g.codexM.firefly;delete g.codexM.flattail}
   return g;
 }
 function migrate(g){
   if(!g)return null;
   if(g.v===SAVE_V)return{...NEW(),...g};
-  if(g.v===5){fixGone(g);g.v=SAVE_V;return{...NEW(),...g}}
+  if(g.v===6||g.v===5){fixGone(g);g.v=SAVE_V;return{...NEW(),...g}}
   if(g.v===4||g.v===3){(g.pets||[]).forEach(petDefaults);(g.fugitives||[]).forEach(petDefaults);if(g.v===3)g.tutDone=oldHand(g);fixGone(g);g.v=SAVE_V;return{...NEW(),...g}}
   if(g.v===2){(g.pets||[]).forEach(petDefaults);(g.fugitives||[]).forEach(petDefaults);g.tutDone=oldHand(g);fixGone(g);g.v=SAVE_V;return{...NEW(),...g}}
   if(g.v!==1)return null;
@@ -1571,9 +1658,9 @@ async function cloudInit(){
     const snap=await ref.get();
     cloudRef=ref;
     const d=snap.exists?snap.data():null;
-    if(d&&d.updated>G.updated&&(current==='v-base'||current==='v-start')){
+    if(d&&d.updated>G.updated&&!G.sandbox&&(current==='v-base'||current==='v-start')){
       const g=migrate(JSON.parse(d.json));
-      if(g){G=g;save();goHome()}
+      if(g){G=g;save();if(G.tutor)tutorResume();else goHome()}
     }else if(G.updated&&(!d||G.updated>d.updated))cloudFlush();
   }catch(e){}
 }
@@ -1627,11 +1714,12 @@ function statsOf(race,muts=[],combos=[],debuffs=[],pet=null){
   const cs=combos.map(id=>COMBO[id]).filter(Boolean);
   cs.forEach(c=>{addS(c.s||{});add(c)});
   cs.forEach(c=>{(c.rm||[]).forEach(t=>s.tags.delete(t));if(c.rmAbil)s.abil=s.abil.filter(a=>!c.rmAbil.includes(a))});
-  cs.forEach(c=>{if(c.set)for(const k in c.set)s[k]=c.set[k]});
   formsOf(race,muts).forEach(f=>{
     addS(f.s||{});(f.tags||[]).forEach(t=>s.tags.add(t));(f.rm||[]).forEach(t=>s.tags.delete(t));if(f.abil)s.abil.push(f.abil);
     if(f.lv3){addS(f.s3||{});(f.tags3||[]).forEach(t=>s.tags.add(t));if(f.abil3)s.abil.push(f.abil3)}
   });
+  /* «Всегда» из сочетаний сильнее видов */
+  cs.forEach(c=>{if(c.set)for(const k in c.set)s[k]=c.set[k]});
   if(s.tags.has('noShove'))s.abil=s.abil.filter(a=>a!=='shove');
   if(s.tags.has('eyes5')&&s.range>=2)s.range+=1;
   if(s.tags.has('reach')&&s.range<2)s.range=2;
@@ -1649,7 +1737,7 @@ const debuffCount=p=>p.debuffs.length+p.muts.filter(id=>MUT[id]&&MUT[id].k==='ba
 function petScore(p){
   let v=0;
   p.muts.forEach(id=>{const m=MUT[id];if(m)v+=m.k==='bad'?-15:RARITY[m.t].pts});
-  p.combos.forEach(id=>{if(COMBO[id])v+=COMBO[id].bad?-30:100});
+  p.combos.forEach(id=>{if(COMBO[id])v+=40+30*COMBO[id].tier});
   v-=15*p.debuffs.length;
   v+=5*((p.lvl||1)-1)+5*(p.legend||0);
   return Math.max(0,v);
@@ -1715,7 +1803,7 @@ const chip=(ic,v,lbl)=>`<span class="chip" title="${lbl}" aria-label="${lbl}: ${
 const resChips=()=>`${chip('food',G.food,'Еда')}${chip('water',G.water,'Чистая вода')}${chip('mosq',G.mosq,'Комары в банке')}`;
 function mutChips(p){
   return p.muts.filter(id=>MUT[id]).map(id=>`<span class="mchip ${MUT[id].k==='bad'?'bad':'t'+MUT[id].t}">${MUT[id].name}</span>`).join('')+
-    p.combos.filter(id=>COMBO[id]).map(id=>`<span class="mchip ${COMBO[id].bad?'bad':'sup'}">${COMBO[id].name}</span>`).join('')+
+    p.combos.filter(id=>COMBO[id]).map(id=>`<span class="mchip ct${COMBO[id].tier}">${COMBO[id].name}</span>`).join('')+
     p.debuffs.map(id=>`<span class="mchip bad">${DEBUFFS[id].name}</span>`).join('');
 }
 function statLine(s){return `<div class="stats"><span>ОЗ <b>${s.hp}</b></span><span>АТК <b>${s.atk}</b></span><span>ХОД <b>${s.mov}</b></span><span>ИНИЦ <b>${s.init}</b></span>${s.range>1?`<span>ДАЛЬ <b>${s.range}</b></span>`:''}<span>ЗАП <b>${s.mpMax}</b> +${s.mpReg}</span></div>`}
@@ -1738,9 +1826,11 @@ function renderStart(){
     <div class="term">${QUIPS.start[0]}</div>
     <h3>Кто прибился к лаборатории первым?</h3>
     <div class="beasts">${beastCards('startWith')}</div>
+    ${G.sandbox?'<div class="term">Учебный режим. Твоя игра отложена и вернётся после обучения.</div>':tutSwitch()}
   </div>`;
   show('v-start');
 }
+const tutSwitch=()=>{const on=tutWanted();return `<button class="btn quiet tutsw" data-act="tutToggle" aria-pressed="${on}"><span>Обучение: <b>${on?'вкл':'выкл'}</b></span><small>${on?'Учебный бой, база и мутации. Пропустить можно в любой момент.':'Сразу на базу: второй уровень и два комара в банке.'}</small></button>`};
 async function pickBeast(title,text){
   const v=$('#v-pick');
   v.innerHTML=`<div class="tape"></div><div class="scroll"><h2>${title}</h2>${text?`<p>${text}</p>`:''}<div class="beasts">${beastCards('res')}</div></div>`;
@@ -1794,11 +1884,11 @@ function openPet(id){
     <div class="term">Опыт ${p.xp} из ${xpTo(p)}${p.lvl>=MAX_LVL?' до очка легенды':''}. Без перегруза переносит мутаций: ${mutCap(p.lvl)}. Запал: ${s.mpStart} в начале боя, запас ${s.mpMax}, +${s.mpReg} за ход. Токсины ${p.tox}: шанс психоза при следующем укусе от ${pct(psychoChance(p.tox))}${fitChance(p.tox)>0?`, приступа в бою ${pct(fitChance(p.tox))} за ход`:''}. Шанс погибнуть при падении в бою ${pct(fallDeath(debuffCount(p)+1))}. Сила: ${petScore(p)} очк.</div>
     <button class="btn" data-act="water" data-id="${p.id}" ${G.water<1||p.tox<=0?'disabled':''}>Дать чистую воду: −${WATER} токсинов<small>воды: ${G.water}</small></button>
     <h3>Способности</h3>
-    <div class="mlist">${s.abil.map(id=>abilLine(id,p)).join('')}</div>
+    <div class="mlist abl">${s.abil.map(id=>abilLine(id,p)).join('')}</div>
     ${p.ptags.length?`<h3>Умения</h3><div class="mlist">${Object.values(PERKS).filter(x=>x.tags&&x.tags.every(t=>p.ptags.includes(t))).map(x=>`<div class="mline"><b>${x.name}</b><br>${x.text}</div>`).join('')}</div>`:''}
     <h3>Мутации и травмы</h3>
     <div class="mlist">
-    ${p.combos.filter(id=>COMBO[id]).map(id=>`<div class="mline"><b>${COMBO[id].name}</b> ${COMBO[id].bad?'(скрытый дебафф)':'(скрытая мутация)'}<br>${COMBO[id].text}</div>`).join('')}
+    ${p.combos.filter(id=>COMBO[id]).map(id=>comboLine(COMBO[id])).join('')}
     ${p.muts.filter(id=>MUT[id]).map(id=>mutLine(MUT[id],p.race)).join('')}
     ${p.debuffs.map(id=>`<div class="mline"><b>${DEBUFFS[id].name}</b> <span class="minus">${DEBUFFS[id].text}</span></div>`).join('')}
     </div>`);
@@ -1806,17 +1896,38 @@ function openPet(id){
 const formLine=f=>`<div class="mline formline"><b>Вид: ${f.name}</b> · ${f.role}<br><span class="plus">${f.plus}.</span> <span class="minus">${f.minus}.</span>${f.lv3?`<br><span class="plus">Третья мутация: ${f.third}.</span>`:`<br><i class="cnote">Третья мутация этой крови усилит вид.</i>`}</div>`;
 const abilLine=(id,p)=>{const A=ABIL[id],c=A.cost-(p.race==='rooster'&&A.sup?1:0)-(p.cheap.includes(id)?1:0);const up=p.plus.includes(id);return `<div class="mline"><span class="cost dark">${Math.max(1,c)}</span> <b>${A.name}${up?'+':''}</b><br>${A.desc}${up?` <span class="plus">${PLUS[id]}</span>`:''}</div>`};
 const mutLine=(m,race)=>{const n=race?classNote(race,m):'';return `<div class="mline"><b>${m.name}</b> · ${RARITY[m.t].name.toLowerCase()}<br>${m.plus?`<span class="plus">${m.plus}.</span> `:''}${m.minus?`<span class="minus">${m.minus}.</span>`:''}${n?`<br><i class="cnote">${n}</i>`:''}<span class="fact">${m.fact}</span></div>`};
+/* Сочетания: строка в кодексе и в карточке, подсказки по частям, которые уже есть у зверей */
+const comboReqName=q=>Array.isArray(q)?q.map(id=>MUT[id].name).join(' или '):MUT[q].name;
+const comboRecipe=c=>(c.race?RACES[c.race].name+' + ':'')+c.req.map(comboReqName).join(' + ');
+const comboLine=c=>`<div class="mline ctier ct${c.tier}"><b>${c.name}</b> · ${COMBO_TIER[c.tier].toLowerCase()}${c.fuse?', слияние':''}<br><span class="plus">${c.plus}.</span> <span class="minus">${c.minus}.</span><span class="fact">${comboRecipe(c)}</span></div>`;
+function comboHints(){
+  const out=[],seen=new Set();
+  (G.pets||[]).forEach(p=>{
+    const has=id=>p.muts.includes(id);
+    COMBOS.forEach(c=>{
+      if(G.codexC[c.id]||seen.has(c.id)||(c.race&&c.race!==p.race))return;
+      const ok=c.req.map(q=>Array.isArray(q)?q.some(has):has(q)),got=ok.filter(Boolean).length,miss=ok.length-got;
+      if(!got||!miss||miss>(c.req.length>=4?2:1))return;
+      seen.add(c.id);
+      const blood=q=>[...new Set([].concat(q).map(id=>SPECIES[MUT[id].sp].name.toLowerCase()))].join(' или ');
+      out.push({c,miss,txt:(c.race?RACES[c.race].name+' + ':'')+c.req.map((q,i)=>ok[i]?comboReqName(q):`??? (${blood(q)})`).join(' + ')+(c.fuse?`, срастутся: ${c.fuse}`:'')});
+    });
+  });
+  return out;
+}
 function openCodex(){
   const groups=Object.entries(SPECIES).map(([k,sp])=>{
     const ms=MUTS.filter(m=>m.sp===k);
-    return `<h3>${sp.name} · ${sp.char.toLowerCase()}</h3><div class="mlist">${ms.map(m=>G.codexM[m.id]?mutLine(m):`<div class="mline lock">Неизвестная мутация · ${RARITY[m.t].name.toLowerCase()}</div>`).join('')}</div>`;
+    return `<h3 class="bloodh">${sp.name} · ${sp.char.toLowerCase()}</h3><div class="mlist">${ms.map(m=>G.codexM[m.id]?mutLine(m):`<div class="mline lock">Неизвестная мутация · ${RARITY[m.t].name.toLowerCase()}</div>`).join('')}</div>`;
   }).join('');
-  const found=COMBOS.filter(c=>G.codexC[c.id]);
-  openSheet(`<h2>Кодекс</h2><p>Здесь копится всё, что ты открыл. Скрытые сочетания нигде не описаны: на них можно только наткнуться.</p>
-    <h3>Скрытые сочетания · ${found.length} из ${COMBOS.length}</h3><div class="mlist">${found.map(c=>`<div class="mline"><b>${c.name}</b><br>${c.text}</div>`).join('')||'<div class="mline lock">Пока ни одного.</div>'}</div>
-    <h3>Новые виды · ${Object.keys(G.codexF||{}).filter(id=>FORM_BY_ID[id]).length} из ${Object.keys(FORM_BY_ID).length}</h3><div class="mlist">${Object.values(FORM_BY_ID).filter(f=>(G.codexF||{})[f.id]).map(f=>`<div class="mline"><b>${f.name}</b> · ${f.role}<br><span class="plus">${f.plus}.</span> <span class="minus">${f.minus}.</span><br><span class="plus">Третья мутация: ${f.third}.</span></div>`).join('')||'<div class="mline lock">Пока ни одного. Чужая кровь прижилась бы со второй мутации.</div>'}</div>
+  const hints=comboHints();
+  const tierBlock=t=>{const all=COMBOS.filter(c=>c.tier===t),f=all.filter(c=>G.codexC[c.id]),hm=new Map();hints.filter(x=>x.c.tier===t).sort((a,b)=>a.miss-b.miss).forEach(x=>{const o=hm.get(x.txt);if(o)o.n++;else hm.set(x.txt,{...x,n:1})});const h=[...hm.values()].slice(0,6);
+    return `<h3 class="ctierh ct${t}">${COMBO_TIERS[t]} · ${f.length} из ${all.length}</h3><div class="mlist">${f.map(comboLine).join('')}${h.map(x=>`<div class="mline lock hint">Подсказка: ${x.txt}${x.n>1?` · таких сочетаний ${x.n}`:''}</div>`).join('')}${!f.length&&!h.length?'<div class="mline lock">Пока ни одного.</div>':''}</div>`};
+  openSheet(`<h2>Кодекс</h2><p>Здесь копится всё, что ты открыл. Скрытые сочетания нигде не описаны, на них можно только наткнуться. У каждого есть плюс и минус. Если у зверя уже есть часть сочетания, здесь появится подсказка.</p>
+    <h2 class="sub">Скрытые сочетания</h2>${[1,2,3,4].map(tierBlock).join('')}
+    <h3 class="formsh">Новые виды · ${Object.keys(G.codexF||{}).filter(id=>FORM_BY_ID[id]).length} из ${Object.keys(FORM_BY_ID).length}</h3><div class="mlist">${Object.values(FORM_BY_ID).filter(f=>(G.codexF||{})[f.id]).map(f=>`<div class="mline"><b>${f.name}</b> · ${f.role}<br><span class="plus">${f.plus}.</span> <span class="minus">${f.minus}.</span><br><span class="plus">Третья мутация: ${f.third}.</span></div>`).join('')||'<div class="mline lock">Пока ни одного. Чужая кровь прижилась бы со второй мутации.</div>'}</div>
     ${groups}
-    <button class="btn quiet" data-act="reset">Начать игру заново</button>`);
+    ${G.sandbox||G.tutor?'':'<button class="btn quiet" data-act="reset">Начать игру заново</button>'}`);
 }
 function openRules(){
   const R_=[
@@ -1824,6 +1935,7 @@ function openRules(){
     ['Запал','Кружки рядом с именем. Тратится на способности, каждый ход понемногу восполняется. Цифра на кнопке: сколько стоит.'],
     ['Толчок','Есть у всех. Удар о препятствие, край поля или другого зверя наносит 2 урона.'],
     ['Клещи','Союзник стоит напротив цели: +1 к урону.'],
+    ['Сочетания','Некоторые мутации вместе дают скрытое сочетание с плюсом и минусом. Бывают обычные, редкие, эпические и легендарные. Две мутации на одном месте тела срастаются в новую часть.'],
     ['На опережение','Обычный удар по тому, кто в этом раунде ещё не ходил: +1 к урону. Поэтому инициатива важна. Враги тоже так бьют.'],
     ['Бочка дихлофоса','Рвётся от удара или толчка: 3 урона вокруг и облако газа.'],
     ['Газ и лужи','Отравляют и добавляют токсины. Капкан наносит 2 урона и держит на месте.'],
@@ -1836,7 +1948,8 @@ function openRules(){
     ['Токсины','Выше 30 укус может вызвать психоз. От 50 в бою бывают приступы: зверь на ход бьёт кого попало. На 100 он сходит с ума прямо в бою. Вода снижает токсины на 15, а кто сидит на базе, выводит 4 за рейд.'],
     ['Падение','Упавший выбывает до конца боя и получает травму навсегда и 8 токсинов. Чем больше дебаффов, тем выше шанс, что он не встанет.'],
   ];
-  openSheet(`<h2>Правила</h2><div class="mlist">${R_.map(([a,b])=>`<div class="mline"><b>${a}</b><br>${b}</div>`).join('')}</div>`);
+  const again=!G.tutor&&!B&&!R&&G.pets.length?`<button class="btn quiet tutsw" data-act="tutAgain">Пройти обучение ещё раз<small>Твоя игра сохранится, вернёшься к ней в конце</small></button>`:'';
+  openSheet(`<h2>Правила</h2><div class="mlist">${R_.map(([a,b])=>`<div class="mline"><b>${a}</b><br>${b}</div>`).join('')}</div>${again}`);
 }
 function openGrave(){
   openSheet(`<h2>Кладбище</h2>${G.grave.length?G.grave.map(g=>`<div class="mline"><b>${esc(g.name)}</b> · ${RACES[g.race].name}, мутаций: ${g.n}<span class="fact">${esc(g.text)}</span></div>`).join(''):'<p>Пока пусто. Это ненадолго.</p>'}`);
@@ -1875,7 +1988,7 @@ async function superReveal(ids,p){
     <button class="btn main" data-res="1">Дальше</button></div>`;
   show('v-pick');await ask();
 }
-const superCard=id=>{const c=COMBO[id];return `<div class="card sup"><h3>${c.bad?'Скрытый дебафф':'Скрытая мутация'}</h3><h2>${c.name}</h2><p>${c.text}</p></div>`};
+const superCard=id=>{const c=COMBO[id];return `<div class="card sup ct${c.tier}"><h3>${COMBO_TIER[c.tier]} сочетание${c.fuse?' · слияние':''}</h3><h2>${c.name}</h2><p><span class="plus">${c.plus}.</span> <span class="minus">${c.minus}.</span></p></div>`};
 
 /* ---------- Лаборатория: микроскоп, квиз, укус ---------- */
 const QN=5,QTIME=25;
@@ -1885,7 +1998,9 @@ async function openLab(){
   if(G.pending)return renderBite();
   if(!G.slide){
     if(G.mosq<=0){toast('В банке нет комаров. Сначала рейд.');return}
-    G.mosq--;G.slide=pick(Object.keys(SPECIES));LAB.theme=dayTheme();save();
+    /* Второй учебный комар приходит уже очищенным */
+    if(G.tutor&&(G.tutor.bit||0)>=1){G.mosq--;G.pending={sp:'weird',tier:1,pur:1};save();return renderBite()}
+    G.mosq--;G.slide=G.tutor?'moll':pick(Object.keys(SPECIES));LAB.theme=dayTheme();save();
     renderScope(true);
   }else{LAB.theme=LAB.theme||dayTheme();renderScope(false)}
 }
@@ -1930,12 +2045,13 @@ function renderQ(){
   const pips=Array.from({length:QN},(_,i)=>`<i class="${Q.marks[i]===true?'ok':Q.marks[i]===false?'no':i===Q.i?'now':''}"></i>`).join('');
   $('#v-quiz').innerHTML=`<div class="scroll">
     <h3>${THEMES[Q.theme]} · ${TIERS[Q.tier].name.toLowerCase()} · нужно ${TIERS[Q.tier].need} из ${QN}</h3>
-    <div class="pips">${pips}</div><div class="timer"><i id="qbar"></i></div>
+    <div class="pips">${pips}</div>${G.tutor?'':'<div class="timer"><i id="qbar"></i></div>'}
     <div class="qtxt">${esc(text)}</div>
     <div class="opts" id="opts">${Q.opts.map((o,i)=>`<button class="opt" data-act="answer" data-i="${i}">${esc(o)}</button>`).join('')}</div>
     <div id="qafter"></div>
   </div>`;
   show('v-quiz');
+  if(G.tutor)return;
   const t0=Date.now();
   qTimer=setInterval(()=>{
     const left=1-(Date.now()-t0)/(QTIME*1000),bar=$('#qbar');
@@ -1964,13 +2080,16 @@ function finishQuiz(){
   const sp=Q.sp,tier=Q.tier;
   G.slide=null;
   if(pass)G.pending={sp,tier,pur};
+  /* Учебный комар не пропадает: можно пройти квиз ещё раз */
+  const retry=!pass&&!!G.tutor;
+  if(retry){G.slide=sp;Coach.go('m-tier')}
   save();
   $('#v-quiz').innerHTML=`<div class="scroll">
     <div class="big-t ${pass?'':'red'}">${pass?`Чистота ${pct(pur)}`:'Образец испорчен'}</div>
     <p>Верных ответов: ${Q.ok} из ${QN}, нужно было ${T.need}.${bonus&&pass?' Тема дня добавила 15% чистоты.':''}</p>
-    <div class="term">${pass?(Q.ok===QN?'Подозрительно. Возможно, ты правда человек.':'Сойдёт. Терминал видал и похуже, их больше нет.'):'Терминал уверен, что ты не человек. Комар пропал, зато справку ты прочитал.'}</div>
+    <div class="term">${pass?(Q.ok===QN?'Подозрительно. Возможно, ты правда человек.':'Сойдёт. Терминал видал и похуже, их больше нет.'):retry?'Не хватило верных ответов. Учебный комар не пропал, попробуй ещё раз. В игре он бы пропал.':'Терминал уверен, что ты не человек. Комар пропал, зато справку ты прочитал.'}</div>
     ${pass?`<div class="card"><h3>Кровь ${SPECIES[sp].gen} готова</h3><p>Что выпадет, узнаешь после укуса.</p>${oddsBar(TIERS[tier].odds)}</div>`:''}
-    <button class="btn main" data-act="${pass?'lab':'home'}">${pass?'Выбрать, кого кусать':'На базу'}</button>
+    <button class="btn main" data-act="${pass||retry?'lab':'home'}">${pass?'Выбрать, кого кусать':retry?'Ещё раз':'На базу'}</button>
   </div>`;
   show('v-quiz');
   Q=null;
@@ -1980,7 +2099,7 @@ function renderBite(){
   const rows=G.pets.map(p=>{
     const gain=toxGain(p,P.sp,P.tier,P.pur),after=p.tox+gain,r=relOf(p.race,P.sp);
     return `<div class="bite-card">${petTag(p,{act:'bite'})}
-      <div class="risk"><span>Смерть <b class="minus">${pct(deathChance(P.tier,P.pur,p))}</b></span><span>Психоз <b class="minus">${pct(psychoChance(after))}</b></span><span>Токсины <b>${p.tox} → ${after}</b></span>${r?`<span class="${r>0?'rel-good':'rel-bad'}">${r>0?'Родство: токсинов меньше':'Конфликт: токсинов больше'}</span>`:''}${overCap(p)?`<span class="rel-bad">Перегруз: уровень ${p.lvl} переносит мутаций ${mutCap(p.lvl)}. Смерть +${25*overCap(p)}%, токсинов в полтора раза больше</span>`:''}
+      <div class="risk"><span>Смерть <b class="minus">${pct(G.tutor?0:deathChance(P.tier,P.pur,p))}</b></span><span>Психоз <b class="minus">${pct(psychoChance(after))}</b></span><span>Токсины <b>${p.tox} → ${after}</b></span>${r?`<span class="${r>0?'rel-good':'rel-bad'}">${r>0?'Родство: токсинов меньше':'Конфликт: токсинов больше'}</span>`:''}${overCap(p)?`<span class="rel-bad">Перегруз: уровень ${p.lvl} переносит мутаций ${mutCap(p.lvl)}. Смерть +${25*overCap(p)}%, токсинов в полтора раза больше</span>`:''}
       <button class="chip" data-act="waterB" data-id="${p.id}" ${G.water<1||p.tox<=0?'disabled style="opacity:.45"':''}>${ICONS.water} −${WATER} токсинов</button></div></div>`;
   }).join('');
   $('#v-lab').innerHTML=`<div class="tape"></div><div class="scroll">
@@ -1994,20 +2113,21 @@ function renderBite(){
 }
 async function doBite(p){
   const P=G.pending;G.pending=null;
-  const dead=chance(deathChance(P.tier,P.pur,p));
+  const tut=!!G.tutor,dead=!tut&&chance(deathChance(P.tier,P.pur,p));
   $('#v-lab').innerHTML=`<div class="tape"></div><div class="scroll"><h2>${esc(p.name)} ждёт укуса</h2><div class="stage" id="stg"><div class="petw">${drawCreature(p)}</div><div class="m">${drawCreature({race:'mosq'})}</div></div></div>`;
   show('v-lab');
   await wait(1050);
   const stg=$('#stg');if(stg){stg.classList.add('bite');const m=stg.querySelector('.m');if(m)m.remove()}
   await wait(800);
   if(dead){save();await funeral(p,'Не пережил крови '+SPECIES[P.sp].gen+'.');goHome();return}
-  const m=rollMutation(p,P.sp,P.tier);
+  const m=tut&&TUT_MUT[P.sp]&&!p.muts.includes(TUT_MUT[P.sp])?MUT[TUT_MUT[P.sp]]:rollMutation(p,P.sp,P.tier);
+  if(tut)G.tutor.bit=(G.tutor.bit||0)+1;
   const formsBefore=formsOf(p.race,p.muts),before=p.tox,fresh=m?grantMutation(p,m.id,true):[];
   const formsNow=formsOf(p.race,p.muts),newForm=formsNow.find(f=>!formsBefore.some(b=>b.id===f.id)),upForm=formsNow.find(f=>f.lv3&&formsBefore.some(b=>b.id===f.id&&!b.lv3));
   p.tox+=toxGain(p,P.sp,P.tier,P.pur);
   let side=null;
-  if(chance(Math.min(.6,p.tox/170))){side=pick(SIDE);p.debuffs.push(side)}
-  const psy=chance(psychoChance(p.tox));
+  if(!tut&&chance(Math.min(.6,p.tox/170))){side=pick(SIDE);p.debuffs.push(side)}
+  const psy=!tut&&chance(psychoChance(p.tox));
   if(psy){removePet(p);G.fugitives.push(p)}
   let freebie=null;
   if(psy&&!G.pets.length){freebie=makePet(pick(STARTERS));G.pets.push(freebie)}
@@ -2191,7 +2311,7 @@ function renderBattle(){
     const k=key(x,y);
     tiles.push(`<div class="tile ${(x+y)%2?'alt':''}" style="--x:${x};--y:${y}">${tileInner(k,L)}</div>`);
   }
-  $('#v-battle').innerHTML=`<div class="b-head"><span class="ttl">Бой ${R.fight+1}/${L.fights.length} · раунд <span id="rnd">1</span> · комары: <span id="caught">${R.loot.mosq}</span></span><span class="b-btns"><button data-act="rules" aria-label="Правила">Правила</button><button data-act="bflee" id="fleeBtn">Сбежать</button></span></div>
+  $('#v-battle').innerHTML=`<div class="b-head"><span class="ttl">${R.tutor?'Учебный бой':`Бой ${R.fight+1}/${L.fights.length}`} · раунд <span id="rnd">1</span> · комары: <span id="caught">${R.loot.mosq}</span></span><span class="b-btns"><button data-act="rules" aria-label="Правила">Правила</button>${R.tutor?'':'<button data-act="bflee" id="fleeBtn">Сбежать</button>'}</span></div>
     <div class="queue" id="queue"></div>
     <div class="board-wrap"><div class="board" id="board" style="--t1:${L.tiles[0]};--t2:${L.tiles[1]}">${tiles.join('')}<div id="fxl"></div><div id="units">${B.units.map(unitHTML).join('')}</div><div id="hls"></div></div></div>
     <div class="panel" id="panel"></div>`;
@@ -2363,7 +2483,7 @@ function damage(t,n,o={}){
   const mate=o.src&&!o.shared?(t.riding||t.rider):null;
   t.hp-=n;flt(t,(o.crit?'КРИТ ':'')+'−'+n,o.crit?'big':'dmg');shake(t);
   const near=()=>o.melee&&o.src&&alive(o.src)&&o.src!==t&&dist(o.src,t)<=1;
-  if(near()&&t.tags.has('quills')){flt(o.src,'укололся','info');damage(o.src,2,{})}
+  if(near()&&t.tags.has('quills')){flt(o.src,'укололся','info');damage(o.src,t.tags.has('quills3')?3:2,{})}
   if(near()&&t.tags.has('thorns')){flt(o.src,'укололся','info');damage(o.src,1,{})}
   if(near()&&t.tags.has('bitter')){flt(o.src,'горько','info');applyStatus(o.src,'poison',2)}
   if(near()&&t.tags.has('hive')&&t.bees>0){t.bees--;flt(o.src,'пчела!','info');damage(o.src,2,{})}
@@ -2420,11 +2540,11 @@ function moltOut(t,src){
   stepHazard(t);
 }
 function spawnTermite(u){
-  if(B.units.filter(x=>x.kind==='minion'&&x.side===u.side&&alive(x)).length>=2)return false;
+  if(B.units.filter(x=>x.kind==='minion'&&x.side===u.side&&alive(x)).length>=(u.tags.has('termiteQueen')?3:2))return false;
   for(const[a,b]of shuffle(DIRS.slice())){
     const x=u.x+a,y=u.y+b;
     if(!inB(x,y)||B.rocks.has(key(x,y))||unitAt(x,y))continue;
-    const t=mkUnit('termite',u.side,'minion',{name:'Термит'});t.x=x;t.y=y;B.units.push(t);addDom(t);
+    const t=mkUnit('termite',u.side,'minion',{name:'Термит'});t.x=x;t.y=y;if(u.tags.has('fatTermites')){t.max=t.hp=3;if(u.hp>1)damage(u,1,{})}B.units.push(t);addDom(t);
     flt(t,'родился','info');logMsg(`${u.name} родил термита.`);
     return true;
   }
@@ -2443,7 +2563,7 @@ function spitOutAt(u,c){
 function autoSpit(u){
   const t=u.gulped;if(!t)return false;
   const free=[];
-  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const d=dist(u,{x,y});if((d===2||d===1)&&!B.rocks.has(key(x,y))&&!unitAt(x,y))free.push({x,y,d})}
+  const far=u.tags.has('spit4')?4:2;for(let y=0;y<H;y++)for(let x=0;x<W;x++){const d=dist(u,{x,y});if(d>=1&&d<=far&&!B.rocks.has(key(x,y))&&!unitAt(x,y))free.push({x,y,d})}
   if(!free.length)return false;
   /* Своего несёт к врагам, чужого выплёвывает в лужу или подальше */
   const hazard=c=>B.pools.has(key(c.x,c.y))||B.traps.has(key(c.x,c.y))?1:0,ene=enemiesOf(u),nearE=c=>ene.length?Math.min(...ene.map(e=>dist(e,c))):0;
@@ -2452,6 +2572,7 @@ function autoSpit(u){
   return true;
 }
 function leaveSlime(u,x0,y0,x1,y1){
+  if(u.tags.has('puddleTrail')&&(x0!==x1||y0!==y1)){const k=key(x0,y0);if(!B.rocks.has(k)&&!B.items.has(k)&&!B.traps.has(k)&&!B.pools.has(k)){B.pools.add(k);const el=tileEl(x0,y0);if(el)el.innerHTML=tileInner(k,R.L)}}
   if(!u.tags.has('slimeTrail'))return;
   const put=(x,y)=>{const k=key(x,y);if(!B.rocks.has(k)&&(!B.fx[k]||B.fx[k].type==='slime'))B.fx[k]={type:'slime',ttl:2}};
   const dx=Math.sign(x1-x0),dy=Math.sign(y1-y0);let x=x0,y=y0;put(x,y);
@@ -2482,6 +2603,7 @@ function fall(u,src){
   if(u.gone||u.down)return;
   if(u.kind==='barrel'){u.gone=true;syncUnit(u);boom(u);return}
   if(u.kind==='mosq'){u.gone=true;splat(u);flt(u,'размазан','big');logMsg('Комар размазан. Кровь пропала.');syncUnit(u);return}
+  if(B.tutor&&u.side==='pet'&&u.pet){u.hp=1;flt(u,'держится','info');syncUnit(u);return}
   if(u.tags.has('hearts')&&!u.revived){u.revived=true;u.hp=u.tags.has('fullRevive')?u.max:Math.ceil(u.max/2);flt(u,'ещё сердце','big');logMsg(`${u.name} встаёт: в запасе было ещё сердце.`);syncUnit(u);return}
   u.hp=0;
   if(u.charge){u.charge=null;clearWarn(u)}
@@ -2513,7 +2635,9 @@ function fall(u,src){
     if(src.tags.has('scavenger'))heal(src,src.tags.has('bigScav')?6:src.tags.has('weakScav')?1:3);
     if(src.tags.has('alphaKill')){src.atk++;flt(src,'+1 атака','heal')}
     if(src.tags.has('killMp')&&src.mpMax){src.mp=Math.min(src.mpMax,src.mp+2);flt(src,'+2 запала','heal')}
-    if(src.tags.has('chew'))src.chewNext=true;
+    if(src.tags.has('chew'))src.chewNext=src.tags.has('chewLong')?2:1;
+    if(src.tags.has('soupTox')&&src.pet){flt(src,'+3 токс.','info');addTox(src,3)}
+    if(src.tags.has('killFear')){flt(src,'РРР','big');enemiesOf(src).filter(o=>alive(o)&&dist(o,src)<=1&&o.kind!=='mosq'&&o.kind!=='egg'&&!o.boss).forEach(o=>{o.fearOf=src.uid;applyStatus(o,'fear',1)})}
     if(src.tags.has('shadow'))src.resetTurn=true;
   }
   syncUnit(u);
@@ -2537,6 +2661,7 @@ function pushUnit(t,from,n,hit=2){
   if(t.tags.has('noPush')){flt(t,'держится','info');return}
   const dx=Math.sign(t.x-from.x),dy=dx?0:Math.sign(t.y-from.y);
   if(!dx&&!dy)return;
+  let moved=false;
   for(let i=0;i<n&&alive(t);i++){
     const x=t.x+dx,y=t.y+dy,inside=inB(x,y),rock=inside&&B.rocks.has(key(x,y))&&!t.tags.has('fly'),o=inside?unitAt(x,y):null;
     if(!inside||rock||o){
@@ -2544,13 +2669,15 @@ function pushUnit(t,from,n,hit=2){
       if(o&&o.kind!=='mosq')damage(o,hit,{});
       break;
     }
-    t.x=x;t.y=y;syncUnit(t);
+    t.x=x;t.y=y;syncUnit(t);moved=true;
   }
   if(alive(t))stepHazard(t);
+  if(moved&&alive(t)&&t.tags.has('flipStun')){flt(t,'на спине','big');applyStatus(t,'stun',1)}
 }
 function pickItem(u,k){
   const it=B.items.get(k);
   if(it==='fang'&&B.fangBy[k]!==u.uid)return;
+  if(it==='canfood'&&u.tags.has('noCan')){flt(u,'фу','info');return}
   B.items.delete(k);
   const el=tileEl(u.x,u.y);if(el)el.innerHTML=tileInner(k,R.L);
   if(it==='fang'){delete B.fangBy[k];u.fangs=Math.min(2,(u.fangs||0)+1);flt(u,'клык в пасти','big');syncUnit(u);return}
@@ -2633,6 +2760,9 @@ function abRange(u,id){
   if(id==='dash'&&hasPlus(u,'dash'))r=7;
   if(u.tags.has('longCrow')&&(id==='crow'||id==='rally'))r+=2;
   if(u.tags.has('kraken')&&id==='pull')r+=1;
+  if(u.tags.has('krakenPull')&&id==='pull')r=Math.max(r,5);
+  if(u.tags.has('scorpLong')&&id==='scorpion')r=3;
+  if(u.tags.has('spit4')&&id==='spitout')r=4;
   if(u.tags.has('longTrunk')&&id==='trunk')r=4;
   if(u.tags.has('longHop')&&id==='hop')r=6;
   if(u.race==='rooster'&&A.sup)r+=1;
@@ -2689,6 +2819,8 @@ function hitPower(u,t){
   let dmg=(d0<=1?pow(u):u.atk)+(u.st.rallied?1:0);
   if(u.tags.has('clawrun')&&(u.ran||0)>=3)dmg+=2;
   if(u.tags.has('sniffWounded')&&t.hp<t.max)dmg+=1;
+  if(u.tags.has('needRun')&&!(u.ran>0))dmg-=1;
+  if(u.tags.has('herd')&&!DIRS.some(([a,b])=>{const o=unitAt(u.x+a,u.y+b);return o&&o!==u&&o.side===u.side&&o.side!=='obj'&&o.kind!=='mosq'&&o.kind!=='egg'&&o.kind!=='husk'}))dmg-=1;
   if(DIRS.some(([a,b])=>{const o=unitAt(u.x+a,u.y+b);return o&&o.side!==u.side&&o.tags.has('mane')}))dmg=Math.max(1,dmg-1);
   if(flanked(u,t))dmg+=1;
   if(u.tags.has('lastStand')&&u.hp*3<u.max)dmg+=2;
@@ -2725,18 +2857,18 @@ const ABIL={
   dash:{name:'Рывок',cost:2,target:'enemy',range:5,lands:true,desc:'Прыгает к цели на 5 клеток и кусает.',run:async(u,t)=>{await leapTo(u,t);if(alive(t))await attack(u,t);if(alive(t)&&u.tags.has('dashPush'))pushUnit(t,u,1);if(alive(u))stepHazard(u)}},
   blindspit:{name:'В глаза',cost:2,target:'enemy',range:3,los:true,desc:'Плевок слепит цель на 2 хода.',run:async(u,t)=>{await shot(u,t,'#e9e2b7');if(hasPlus(u,'blindspit'))damage(t,1,{src:u});if(alive(t))applyStatus(t,'blind',hasPlus(u,'blindspit')?3:2)}},
   trunk:{name:'Хобот',sup:true,cost:2,target:'ally',range:2,desc:'Лечит союзника на 3 ОЗ и снимает яд и слепоту.',run:async(u,t)=>{heal(t,u.race==='rooster'?4:3);t.st.poison=0;t.st.blind=0;syncUnit(t);await wait(150)}},
-  ram:{name:'Таран',cost:3,target:'enemy',range:3,line:true,los:true,desc:'Бежит к цели по прямой: двойной урон и отброс.',run:async(u,t)=>{const dx=Math.sign(t.x-u.x),dy=Math.sign(t.y-u.y);while(dist(u,t)>1){const x=u.x+dx,y=u.y+dy;if(unitAt(x,y)||B.rocks.has(key(x,y)))break;u.x=x;u.y=y}u.movedTurn=true;syncUnit(u);await wait(200);if(dist(u,t)<=1){damage(t,pow(u)*2,{src:u,melee:true});if(alive(t))pushUnit(t,u,u.tags.has('bigRam')?3:1)}if(alive(u))stepHazard(u)}},
-  pull:{name:'Притянуть',cost:2,target:'enemy',range:3,line:true,los:true,desc:'Тянет цель вплотную по прямой и наносит 1 урон.',run:async(u,t)=>{dragTo(u,t);await wait(200);damage(t,1+(u.tags.has('kraken')?2:0),{src:u})}},
-  hide:{name:'Спрятаться',cost:2,target:'self',desc:'Весь урон вдвое меньше до следующего хода.',run:async u=>{u.st.hide=1;flt(u,'спрятался','info');await wait(200)}},
-  ink:{name:'Чернила',sup:true,cost:3,target:'cell',range:3,desc:'Слепит всех на выбранной клетке и вокруг неё, своих тоже.',run:async(u,c)=>{await shot(u,c,'#26222e');around(c.x,c.y,1).forEach(p=>{B.fx[key(p.x,p.y)]={type:'ink',ttl:1};const o=unitAt(p.x,p.y);if(o&&o.kind!=='barrel')applyStatus(o,'blind',2)});renderFx()}},
+  ram:{name:'Таран',cost:3,target:'enemy',range:3,line:true,los:true,desc:'Бежит к цели по прямой: двойной урон и отброс.',run:async(u,t)=>{const dx=Math.sign(t.x-u.x),dy=Math.sign(t.y-u.y);if(u.tags.has('stomp')){let x=u.x+dx,y=u.y+dy;while(inB(x,y)&&(x!==t.x||y!==t.y)){const o=unitAt(x,y);if(o&&o.side!==u.side&&o.kind!=='mosq'){flt(o,'растоптан','big');damage(o,pow(u),{src:u,melee:true})}x+=dx;y+=dy}}while(dist(u,t)>1){const x=u.x+dx,y=u.y+dy;if(unitAt(x,y)||B.rocks.has(key(x,y)))break;u.x=x;u.y=y}u.movedTurn=true;syncUnit(u);await wait(200);if(dist(u,t)<=1){damage(t,pow(u)*2,{src:u,melee:true});if(alive(t))pushUnit(t,u,u.tags.has('bigRam')?3:1)}if(alive(u))stepHazard(u);if(alive(u)&&u.tags.has('ramDizzy')){flt(u,'голова кружится','info');u.st.stun=1}}},
+  pull:{name:'Притянуть',cost:2,target:'enemy',range:3,line:true,los:true,desc:'Тянет цель вплотную по прямой и наносит 1 урон.',run:async(u,t)=>{dragTo(u,t);await wait(200);const big=u.tags.has('hookPull')||u.tags.has('krakenPull');damage(t,(big?pow(u):1)+(u.tags.has('kraken')?2:0),{src:u});if(u.tags.has('hookPull')&&alive(t)){applyStatus(t,'held',2);applyStatus(t,'bleed',2);u.stickNext=true}}},
+  hide:{name:'Спрятаться',cost:2,target:'self',desc:'Весь урон вдвое меньше до следующего хода.',run:async u=>{u.st.hide=1;if(u.tags.has('hideLock'))u.stickNext=true;flt(u,'спрятался','info');await wait(200)}},
+  ink:{name:'Чернила',sup:true,cost:3,target:'cell',range:3,desc:'Слепит всех на выбранной клетке и вокруг неё, своих тоже.',run:async(u,c)=>{await shot(u,c,'#26222e');around(c.x,c.y,1).forEach(p=>{B.fx[key(p.x,p.y)]={type:'ink',ttl:1};const o=unitAt(p.x,p.y);if(o&&o.kind!=='barrel'&&!(u.tags.has('inkSafe')&&o.side===u.side))applyStatus(o,'blind',2)});renderFx()}},
   clam:{name:'Захлопнуть',cost:3,target:'enemy',range:1,desc:'Двойной урон, цель не ходит 2 хода. Сам стоит до следующего хода.',run:async(u,t)=>{await lunge(u,t);damage(t,pow(u)*2,{src:u,melee:true});if(alive(t))applyStatus(t,'held',2);u.st.held=2}},
   scorpion:{name:'Ужалить',cost:3,target:'enemy',range:2,los:true,desc:'Урон и яд на 3 хода, бьёт с 2 клеток.',run:async(u,t)=>{await lunge(u,t);damage(t,u.atk,{src:u,melee:dist(u,t)<=1});if(alive(t))applyStatus(t,'poison',3)}},
-  cobra:{name:'Раздуться',cost:2,target:'self',desc:'Соседние враги отлетают на клетку и слепнут на ход.',run:async u=>{flt(u,'ШШШ','big');await wait(150);DIRS.forEach(([a,b])=>{const o=unitAt(u.x+a,u.y+b);if(o&&enemiesOf(u).includes(o)){applyStatus(o,'blind',1);if(alive(o))pushUnit(o,u,1)}})}},
-  dive:{name:'Пике',cost:3,target:'enemy',range:4,lands:true,desc:'Падает на цель с 4 клеток: АТК+3.',run:async(u,t)=>{await leapTo(u,t);damage(t,u.atk+3,{src:u,melee:true});if(alive(u))stepHazard(u)}},
+  cobra:{name:'Раздуться',cost:2,target:'self',desc:'Соседние враги отлетают на клетку и слепнут на ход.',run:async u=>{flt(u,'ШШШ','big');await wait(150);(u.tags.has('cobra2')?enemiesOf(u).filter(o=>dist(u,o)<=2):DIRS.map(([a,b])=>unitAt(u.x+a,u.y+b)).filter(o=>o&&enemiesOf(u).includes(o))).filter(o=>o.kind!=='mosq').forEach(o=>{applyStatus(o,'blind',1);if(alive(o))pushUnit(o,u,1)})}},
+  dive:{name:'Пике',cost:3,target:'enemy',range:4,lands:true,desc:'Падает на цель с 4 клеток: АТК+3.',run:async(u,t)=>{await leapTo(u,t);const cr=u.tags.has('diveCrit');damage(t,cr?Math.ceil((u.atk+3)*1.5):u.atk+3,{src:u,melee:true,crit:cr});if(alive(t)&&u.tags.has('diveVenom'))applyStatus(t,'poison',3);if(alive(u))stepHazard(u)}},
   hop:{name:'Прыжок',cost:1,target:'cell',cellFree:true,range:4,desc:'Прыгает на 4 клетки через препятствия. Обычный шаг остаётся.',run:async(u,c)=>{u.x=c.x;u.y=c.y;u.movedTurn=true;syncUnit(u);await wait(200);stepHazard(u)}},
   grab:{name:'Схватить',cost:3,target:'enemy',range:1,needStill:true,desc:'Двойной урон, цель не ходит ход. Только если ещё не двигался.',run:async(u,t)=>{await lunge(u,t);damage(t,pow(u)*2,{src:u,melee:true});if(alive(t))applyStatus(t,'held',1)}},
   sting:{name:'Жало',cost:3,target:'enemy',range:1,desc:'Тройной урон в упор. 35% упасть самому.',run:async(u,t)=>{await lunge(u,t);damage(t,pow(u)*3,{src:u,melee:true});if(alive(u)&&!u.tags.has('safeSting')&&chance(.35)){flt(u,'жало застряло','big');u.hp=0;fall(u,null)}}},
-  tongue:{name:'Язык',cost:3,target:'enemy',range:5,line:true,los:true,desc:'Тянет цель с 5 клеток, АТК+1. Следующий ход пропускает.',run:async(u,t)=>{dragTo(u,t);await wait(200);damage(t,u.atk+1,{src:u});u.st.stun=1}},
+  tongue:{name:'Язык',cost:3,target:'enemy',range:5,line:true,los:true,desc:'Тянет цель с 5 клеток, АТК+1. Следующий ход пропускает.',run:async(u,t)=>{dragTo(u,t);await wait(200);damage(t,u.atk+1,{src:u});if(!u.tags.has('tongueFree'))u.st.stun=1}},
   egg:{name:'Яйцо',sup:true,once:true,cost:3,target:'cell',cellFree:true,range:1,desc:'Раз за бой: сносит яйцо рядом, через 2 раунда вылупится детёныш. Следующий ход пропускает.',run:async(u,c)=>{
     const e=mkUnit('egg','pet','egg',{name:'Яйцо'});e.x=c.x;e.y=c.y;e.parent=u.race;e.pw={max:u.max,atk:u.atk,mov:u.mov,range:u.range,init:u.init};e.hatch=2;B.units.push(e);addDom(e);
     flt(e,'снёс!','big');
@@ -2761,13 +2893,13 @@ const ABIL={
   cheer:{name:'Петушиный бой',cost:3,target:'self',desc:'Все союзники лечат 1 ОЗ, и следующий удар у них на 1 сильнее.',run:async u=>{flt(u,'КО-КО-КО','big');alliesOf(u).forEach(a=>{a.st.rallied=1;heal(a,hasPlus(u,'cheer')?3:1)});await wait(200)}},
   raise:{name:'Поднять павшего',once:true,cost:5,target:'fallen',range:3,desc:'Раз за бой: упавший союзник встаёт с третью ОЗ. Травма остаётся.',run:async(u,t)=>{t.down=false;t.hp=Math.ceil(t.max/(hasPlus(u,'raise')?2:3));flt(t,'встал!','big');logMsg(`${t.name} снова в строю.`);syncUnit(t);await wait(220)}},
   /* Новые мутации */
-  suck:{name:'Присосаться',cost:1,target:'enemy',range:1,check:(u,t)=>t.kind!=='mosq',desc:'Сосед не может ходить следующий ход.',run:async(u,t)=>{await lunge(u,t);applyStatus(t,'held',1)}},
-  milk:{name:'Молоко',cost:1,target:'ally',range:1,noSelf:true,desc:'Сосед лечит 3 ОЗ и получает 1 запал. Сам теряет 2 ОЗ, но от этого не упадёт.',run:async(u,t)=>{heal(t,3);if(t.mpMax)t.mp=Math.min(t.mpMax,t.mp+1);const n=Math.min(2,u.hp-1);if(n>0)damage(u,n,{});await wait(200)}},
+  suck:{name:'Присосаться',cost:1,target:'enemy',range:1,check:(u,t)=>t.kind!=='mosq',desc:'Сосед не может ходить следующий ход.',run:async(u,t)=>{await lunge(u,t);applyStatus(t,'held',1);if(u.tags.has('suckDrain')&&alive(t)){flt(u,'пьёт','info');damage(t,2,{});heal(u,2)}}},
+  milk:{name:'Молоко',cost:1,target:'ally',range:1,noSelf:true,desc:'Сосед лечит 3 ОЗ и получает 1 запал. Сам теряет 2 ОЗ, но от этого не упадёт.',run:async(u,t)=>{const big=u.tags.has('milkPlus');heal(t,big?5:3);if(t.mpMax)t.mp=Math.min(t.mpMax,t.mp+1);const n=big?0:Math.min(2,u.hp-1);if(n>0)damage(u,n,{});await wait(200)}},
   sip:{name:'Выпить лужу',cost:1,target:'cell',cellPool:true,range:1,desc:'Лужа рядом исчезает: +3 ОЗ и +3 токсина.',run:async(u,c)=>{const k=key(c.x,c.y);B.pools.delete(k);const el=tileEl(c.x,c.y);if(el)el.innerHTML=tileInner(k,R.L);flt(u,'глык','big');heal(u,3);addTox(u,3);await wait(200)}},
-  lionroar:{name:'Рявкнуть',cost:2,target:'self',desc:'Враги в 2 клетках на ход убегают от него. Боссы не боятся.',run:async u=>{flt(u,'РРРАУ','big');await wait(150);enemiesOf(u).filter(o=>dist(u,o)<=2&&o.kind!=='mosq'&&o.kind!=='egg').forEach(o=>{if(o.boss){flt(o,'не боится','info');return}o.fearOf=u.uid;applyStatus(o,'fear',1)})}},
+  lionroar:{name:'Рявкнуть',cost:2,target:'self',desc:'Враги в 2 клетках на ход убегают от него. Боссы не боятся.',run:async u=>{flt(u,'РРРАУ','big');await wait(150);enemiesOf(u).filter(o=>dist(u,o)<=(u.tags.has('roar3')?3:2)&&o.kind!=='mosq'&&o.kind!=='egg').forEach(o=>{if(o.boss){flt(o,'не боится','info');return}o.fearOf=u.uid;applyStatus(o,'fear',1)})}},
   gulp:{name:'Проглотить',cost:2,target:'any',range:1,can:u=>!u.gulped,check:(u,t)=>!t.boss&&!t.special&&t.kind!=='barrel'&&t.kind!=='egg'&&!isExtra(t)&&!t.rider&&!t.riding&&(t.side===u.side||realFoes().length>1),desc:'Носит соседа в мешке 2 хода, потом выплёвывает на 2 клетки. Запалом можно выплюнуть раньше, куда захочешь. Босса и последнего врага не берёт.',run:async(u,t)=>{await lunge(u,t);if(t.charge){t.charge=null;clearWarn(t)}t.gone=true;t.swallowed=u.uid;u.gulped=t;u.gulpT=2;u.abil.push({id:'spitout',used:false,spent:false});syncUnit(t);flt(u,'ГЛОТЬ','big');logMsg(`${u.name} проглотил: ${t.name}.`)}},
   spitout:{name:'Выплюнуть',cost:1,target:'cell',cellFree:true,range:2,can:u=>!!u.gulped,desc:'Выплёвывает проглоченного на выбранную клетку в 2 шагах.',run:async(u,c)=>{spitOutAt(u,c);await wait(200)}},
-  peacock:{name:'Распустить хвост',cost:2,target:'self',desc:'Враги в 3 клетках на ход смотрят только на него и мажут в 30% ударов.',run:async u=>{flt(u,'ТА-ДАМ','big');enemiesOf(u).filter(o=>dist(u,o)<=3&&o.kind!=='mosq'&&o.kind!=='egg').forEach(o=>{o.dazzleBy=u.uid;applyStatus(o,'dazzle',1)});await wait(200)}},
+  peacock:{name:'Распустить хвост',cost:2,target:'self',desc:'Враги в 3 клетках на ход смотрят только на него и мажут в 30% ударов.',run:async u=>{flt(u,'ТА-ДАМ','big');enemiesOf(u).filter(o=>dist(u,o)<=3&&o.kind!=='mosq'&&o.kind!=='egg').forEach(o=>{o.dazzleBy=u.uid;applyStatus(o,'dazzle',1);if(u.tags.has('peacockBlind2'))applyStatus(o,'blind',2);else if(u.tags.has('peacockBlind'))applyStatus(o,'blind',1)});await wait(200)}},
   /* Приёмы новых видов */
   cheese:{name:'Вонючая брынза',cost:2,target:'cell',cellFree:true,range:3,desc:'Сыр лежит 2 раунда: враги в 2 клетках грызут его вместо удара. Хватает на 3 укуса, босс соблазняется через раз.',run:async(u,c)=>{await shot(u,c,'#f2d24b');B.fx[key(c.x,c.y)]={type:'cheese',ttl:2,left:3,poison:u.tags.has('cheesePoison')};renderFx();flt(c,'вонища','big')}},
   hiveswarm:{name:'Рой',cost:1,target:'self',can:u=>(u.bees||0)>0&&enemiesOf(u).some(o=>o.kind!=='mosq'&&dist(u,o)<=3),desc:'Все пчёлы жалят случайных врагов в 3 клетках, по 1 урону.',run:async u=>{let n=u.bees||0;flt(u,'ЖЖЖ','big');u.bees=0;syncUnit(u);for(;n>0;n--){const p=enemiesOf(u).filter(o=>alive(o)&&o.kind!=='mosq'&&dist(u,o)<=3);if(!p.length)break;const t=pick(p);await shot(u,t,'#f2bb16');damage(t,1,{src:u})}}},
@@ -2862,10 +2994,10 @@ async function attack(u,t){
     }
   }
   if(far&&u.tags.has('recoil')&&alive(u)){flt(u,'отдача','info');bounce(u,{x:tx,y:ty},2)}
-  if(u.tags.has('push')&&alive(t))pushUnit(t,u,1);
+  if(u.tags.has('push')&&alive(t)){const x0=t.x,y0=t.y;pushUnit(t,u,u.tags.has('push2')?2:1);if(u.tags.has('plunger')&&d0<=1&&live&&alive(t)&&(t.x!==x0||t.y!==y0)){flt(t,'присосался','info');applyStatus(t,'held',1);u.stickNext=true}}
   if(d0<=1&&live&&u.tags.has('flip')&&alive(t)&&!t.tags.has('noPush')&&!t.rider){
     const x=u.x+(u.x-t.x),y=u.y+(u.y-t.y);
-    if(inB(x,y)&&!B.rocks.has(key(x,y))&&!unitAt(x,y)){t.x=x;t.y=y;flt(t,'через спину','big');syncUnit(t);stepHazard(t)}
+    if(inB(x,y)&&!B.rocks.has(key(x,y))&&!unitAt(x,y)){t.x=x;t.y=y;flt(t,'через спину','big');syncUnit(t);stepHazard(t);if(u.tags.has('flipSlam')&&alive(t))damage(t,2,{})}
   }
   if(live&&u.tags.has('twoEyes')){
     const o=enemiesOf(u).find(x=>x!==t&&x.kind!=='mosq'&&!x.riding&&dist(x,{x:tx,y:ty})<=1);
@@ -2901,6 +3033,7 @@ function newRound(){
     if(B.round%2===0&&B.units.filter(u=>u.race==='swarm'&&alive(u)).length<3){if(addFoe('swarm',q))logMsg('Королева выпустила рой.')}
   }
   if(B.round===2)spawnMosq();
+  if(B.tutor&&B.round===2)tutorMosq();
 }
 function checkEnd(){
   if(B.over)return true;
@@ -2949,9 +3082,12 @@ async function beginTurn(u){
   u.st.roar=0;u.st.hide=0;u.ran=0;u.movedTurn=false;u.resetTurn=false;u.turnN=(u.turnN||0)+1;u.hopNow=false;
   B.units.forEach(x=>{if(x.recolorBy===u.uid){x.recolorBy=0;syncUnit(x)}});
   if(u.tags.has('hive'))u.bees=Math.min(5,(u.bees||0)+1);
-  if(u.chewNext){u.chewNext=false;u.st.held=1;flt(u,'жуёт','info');any=true}
+  if(u.chewNext>0){u.chewNext--;u.st.held=1;flt(u,'жуёт','info');any=true}
+  if(u.stickNext){u.stickNext=false;u.st.held=1;flt(u,'не может отойти','info');any=true}
   if(u.tags.has('coconutRegen')&&u.turnN%3===0&&u.shield<1){u.shield=1;flt(u,'скорлупа отросла','info')}
   if(u.tags.has('regen')&&u.hp<u.max)heal(u,1);
+  if(u.tags.has('poolHeal')&&B.pools.has(key(u.x,u.y))&&u.hp<u.max){heal(u,2);any=true}
+  if(u.tags.has('dryGasp')&&!B.pools.has(key(u.x,u.y))&&u.hp>1){flt(u,'задыхается','info');damage(u,1,{});any=true}
   if(u.st.poison>0){u.st.poison--;damage(u,1,{});if(alive(u)&&u.side==='pet'&&u.pet)addTox(u,1);any=true}
   if(alive(u)&&u.st.bleed>0){u.bleedT=(u.bleedT||0)+1;u.st.bleed--;damage(u,u.bleedT,{});if(!u.st.bleed)u.bleedT=0;any=true}
   if(alive(u)&&B.fx[key(u.x,u.y)]&&B.fx[key(u.x,u.y)].type==='gas'){gasHit(u);any=true}
@@ -2960,13 +3096,13 @@ async function beginTurn(u){
     if(alive(u)&&u.side==='pet'&&u.pet)addTox(u,2);
     any=true;
   }
-  if(alive(u)&&u.tags.has('quills')){DIRS.forEach(([a,b])=>{const o=unitAt(u.x+a,u.y+b);if(o&&o.side===u.side&&o!==u&&o.kind!=='egg'){damage(o,1,{});any=true}})}
+  if(alive(u)&&u.tags.has('quills')&&!u.tags.has('quillsSafe')){DIRS.forEach(([a,b])=>{const o=unitAt(u.x+a,u.y+b);if(o&&o.side===u.side&&o!==u&&o.kind!=='egg'){damage(o,1,{});any=true}})}
   if(alive(u)&&u.riding){
     const h=u.riding,o=alliesOf(u).filter(x=>x!==u&&x.kind!=='egg'&&x.hp<x.max).sort((a,c)=>dist(a,u)-dist(c,u))[0]||u;
     flt(u,'пьёт','info');damage(h,2,{});heal(o,2);any=true;
   }
   if(alive(u)&&u.gulped&&--u.gulpT<=0){if(!autoSpit(u))u.gulpT=1;any=true}
-  if(alive(u)&&u.tags.has('termites')&&u.turnN%3===0&&spawnTermite(u))any=true;
+  if(alive(u)&&(u.tags.has('termiteQueen')||(u.tags.has('termites')&&u.turnN%3===0))&&spawnTermite(u))any=true;
   if(alive(u)&&u.tags.has('sleepy')){
     u.sleepT=(u.sleepT||0)+1;
     if(u.sleepT%2===0){u.st.sleep=1;u.skip=true;flt(u,'хр-р-р','big');heal(u,u.tags.has('sleepBig')?5:3);any=true}
@@ -3063,14 +3199,15 @@ async function onCell(x,y){
   if(!B)return;
   const I=B.input;let t=unitAt(x,y);
   if(!I||B.busy){if(t)showInfo(t);return}
+  if(Coach.want('b:info')){if(t)showInfo(t);Coach.on('b:info');return}
   if(t&&t.rider&&I.targets.includes(t.rider)&&!I.targets.includes(t))t=t.rider;
   const u=I.u;
   if(I.mode==='attack'){
-    if(t&&I.nets.includes(t))return act(()=>catchMosq(u,t),'hit');
-    if(t&&I.targets.includes(t)){G.tut.hit=1;return act(()=>attack(u,t),'hit')}
+    if(t&&I.nets.includes(t)){Coach.on('b:catch');return act(()=>catchMosq(u,t),'hit')}
+    if(t&&I.targets.includes(t)){G.tut.hit=1;Coach.on('b:hit');return act(()=>attack(u,t),'hit')}
     if(!t&&I.cells.has(key(x,y))){
       const prev={x:u.x,y:u.y},safe=!cellDanger(x,y),off=!!u.riding,hopping=!off&&I.moved;
-      tutAck();G.tut.move=1;
+      tutAck();G.tut.move=1;Coach.on('b:move');
       B.busy=true;clearHL();
       const step=dist(u,{x,y});
       if(off){unride(u);I.moved=true}
@@ -3092,11 +3229,11 @@ async function onCell(x,y){
   }
   const A=ABIL[I.mode],m=I.mode;
   if(A.target==='cell'){
-    if(I.targets.some(c=>c.x===x&&c.y===y))return act(()=>useAbility(u,m,{x,y}));
+    if(I.targets.some(c=>c.x===x&&c.y===y)){Coach.on('b:abil');return act(()=>useAbility(u,m,{x,y}))}
   }else if(A.target==='fallen'){
     const f=I.targets.find(o=>o.x===x&&o.y===y);
-    if(f)return act(()=>useAbility(u,m,f));
-  }else if(t&&I.targets.includes(t))return act(()=>useAbility(u,m,t));
+    if(f){Coach.on('b:abil');return act(()=>useAbility(u,m,f))}
+  }else if(t&&I.targets.includes(t)){Coach.on('b:abil');return act(()=>useAbility(u,m,t))}
   I.mode='attack';refreshInput();
   if(t)showInfo(t);
 }
@@ -3259,6 +3396,7 @@ async function aiTurn(u){
   }
 }
 async function mosqTurn(u){
+  if(B.tutor){await wait(120);return}
   u.life--;
   if(u.life<=0){u.gone=true;flt(u,'улетел','info');logMsg('Комар улетел. Следующего придётся ждать долго.');syncUnit(u);await wait(150);return}
   const pets=alivePets().filter(p=>p.kind!=='egg'&&!isExtra(p)&&!p.riding);if(!pets.length)return;
@@ -3375,10 +3513,11 @@ async function finishFight(res){
     showBanner(fast?'Быстрая победа':'Бой выигран');
     await wait(850);
     if(B!==me)return;
-    const ups=grantXP(me,15+5*lvl+(fast?5:0));
+    const ups=grantXP(me,R.tutor?xpNeed(1):15+5*lvl+(fast?5:0));
     R.fight++;
     R.pets.forEach(id=>{const p=getPet(id);if(p&&petStats(p).tags.has('hump')){const m=petStats(p).hp;R.hp[id]=Math.min(m,(R.hp[id]||m)+(petStats(p).tags.has('bigHump')?6:3));camels.push(p.name)}});
     R.pets.forEach(id=>{const p=getPet(id);if(p&&petStats(p).tags.has('hump4')){const m=petStats(p).hp;R.hp[id]=Math.min(m,(R.hp[id]||m)+4);if(!camels.includes(p.name))camels.push(p.name)}});
+    R.pets.forEach(id=>{const p=getPet(id);if(p&&petStats(p).tags.has('grazer')){const m=petStats(p).hp;R.hp[id]=Math.min(m,(R.hp[id]||m)+3);if(!camels.includes(p.name))camels.push(p.name)}});
     if(R.pets.some(id=>{const p=getPet(id);return p&&petStats(p).tags.has('honey')}))R.pets.forEach(id=>{const p=getPet(id);if(p){const m=petStats(p).hp;R.hp[id]=Math.min(m,(R.hp[id]||m)+3);if(!camels.includes(p.name))camels.push(p.name)}});
     for(const{p,l,legend}of ups)await levelUpScreen(p,l,legend);
     if(R.fight>=R.L.fights.length)return finishRaid('done');
@@ -3424,8 +3563,8 @@ async function finishRaid(how){
   let captive=null;
   if(rr.captive&&ok){captive=makePet('raccoon');G.pets.push(captive)}
   save();
-  const title={done:rr.lvl===LEVELS.length-1?'Завод остановлен':'Уровень пройден',left:'Ушли с добычей',wipe:'Отряд разбит',flee:'Сбежали'}[how];
-  const note={done:rr.lvl===LEVELS.length-1?'Королева комаров мертва, заводы стоят. Комары остались. Ты прошёл всё, что есть в этом прототипе.':'Терминал впечатлён. Настолько, насколько может.',left:'Разумно. Трусливо, но разумно.',wipe:'Добыча осталась в пустошах. Комары тоже.',flee:'Добыча брошена. Комары тоже.'}[how];
+  const title=rr.tutor?{done:'Учебный бой пройден'}[how]||'Бой окончен':{done:rr.lvl===LEVELS.length-1?'Завод остановлен':'Уровень пройден',left:'Ушли с добычей',wipe:'Отряд разбит',flee:'Сбежали'}[how];
+  const note=rr.tutor?'Таракан повержен, комар в банке. Терминал засчитывает.':{done:rr.lvl===LEVELS.length-1?'Королева комаров мертва, заводы стоят. Комары остались. Ты прошёл всё, что есть в этом прототипе.':'Терминал впечатлён. Настолько, насколько может.',left:'Разумно. Трусливо, но разумно.',wipe:'Добыча осталась в пустошах. Комары тоже.',flee:'Добыча брошена. Комары тоже.'}[how];
   const xpLine=Object.keys(rr.xp).length?rr.squad.map(id=>{const p=getPet(id);return p&&rr.xp[id]?`${esc(p.name)}: +${rr.xp[id]} опыта, уровень ${p.lvl}`:''}).filter(Boolean).join('<br>'):'';
   $('#v-result').innerHTML=`<div class="tape"></div><div class="scroll">
     <div class="big-t ${ok?'':'red'}">${title}</div>
@@ -3628,6 +3767,309 @@ async function runEvent(id){
   if(ctx)for(const{p:x,l,legend}of ctx.ups)await levelUpScreen(x,l,legend);
 }
 
+/* ---------- Обучение: терминал ведёт за руку ----------
+   Подсветка поверх игры: тыкнуть можно только то, что подсвечено. Шаги идут по порядку,
+   каждый ждёт своего экрана. Пропустить можно в любой момент. */
+const TUT_KEY='superdichlofos.notut';
+const tutWanted=()=>{if(G.sandbox)return true;try{return localStorage.getItem(TUT_KEY)!=='1'}catch(e){return true}};
+/* Учебные комары: кровь известна, мутации заданы, вместе дают обычное сочетание «Ласты» */
+const TUT_MUT={moll:'slugfoot',weird:'webbed'};
+const TUT_L={name:'Задний двор',squad:1,tiles:['#a89b6b','#9c8f61'],rocks:0,pools:0,barrels:0,traps:0,air:0,obst:'crate',fights:[{foes:['roach']}],reward:{food:0,water:0}};
+let REAL=null;
+
+/* ---------- Учебный бой ---------- */
+const tB=()=>!!(B&&B.tutor);
+const tPet=()=>tB()?B.units.find(u=>u.side==='pet'&&u.pet&&alive(u)):null;
+const tRoach=()=>tB()?B.units.find(u=>u.race==='roach'&&alive(u)):null;
+const tMosq=()=>tB()?B.units.find(u=>u.kind==='mosq'&&alive(u)):null;
+const tBarrel=()=>tB()?B.units.find(u=>u.kind==='barrel'&&alive(u)):null;
+const tRanged=()=>{const u=tPet();return!!(u&&u.range>1)};
+const tAbil=()=>tRanged()?'blindspit':'shove';
+const bIn=r=>tB()&&!!B.input&&!B.busy&&current==='v-battle'&&(r==null||B.round===r);
+const past=r=>tB()&&B.round>r;
+function cellRect(x,y){const b=$('#board');if(!b)return null;const r=b.getBoundingClientRect(),c=r.width/W;return{left:r.left+x*c,top:r.top+y*c,width:c,height:c}}
+const uCell=u=>u?cellRect(u.x,u.y):null;
+/* Куда шагнуть в первом раунде: вплотную к таракану, верблюду через клетку */
+function tMove1(){
+  const I=B&&B.input,r=tRoach();if(!I||!r)return null;
+  const want=tRanged()?[{x:r.x,y:r.y+2},{x:r.x,y:r.y+1}]:[{x:r.x,y:r.y+1},...DIRS.map(([a,b])=>({x:r.x+a,y:r.y+b}))];
+  return want.find(c=>I.cells.has(key(c.x,c.y)))||null;
+}
+/* Во втором раунде: рядом с комаром, лучше на бутылку */
+function tMove2(){
+  const I=B&&B.input,m=tMosq();if(!I||!m)return null;
+  const list=[{x:4,y:5},...DIRS.map(([a,b])=>({x:m.x+a,y:m.y+b}))];
+  return list.find(c=>dist(c,m)===1&&I.cells.has(key(c.x,c.y)))||null;
+}
+function startTutorFight(){
+  const p=G.pets[0];if(!p){G.tutor=null;return goHome()}
+  R={lvl:-1,L:TUT_L,fight:0,pets:[p.id],squad:[p.id],hp:{},xp:{},mosq:[0],loot:{mosq:0,food:0,water:0},dead:[],back:[],captive:false,fugMet:true,wild:[],evDue:[false],evUsed:[],evMosq:0,next:null,tutor:true};
+  B={rocks:new Set(['2,2','5,4','0,2']),pools:new Set(['0,6']),traps:new Set(),items:new Map([['4,5','bottle']]),fx:{},warn:{},units:[],queue:[],round:0,ambush:null,fangBy:{},mosqDue:0,cur:null,input:null,busy:false,over:false,result:null,log:'',info:'',splats:[],tutor:true};
+  const u=mkUnit(p.race,'pet','pet',{pet:p,name:p.name,muts:p.muts,combos:p.combos,debuffs:p.debuffs});
+  u.x=2;u.y=7;u.crit=0;R.hp[p.id]=u.max;B.units.push(u);
+  const b=mkUnit('barrel','obj','barrel');b.hp=b.max=1;b.x=4;b.y=1;B.units.push(b);
+  /* Таракан переживёт первый ход и падает со второго удара, какой бы зверь ни был */
+  const r=mkUnit('roach','foe','mob',{});r.x=2;r.y=3;r.crit=0;
+  const d1=u.range>1?u.atk+1:pow(u)+1+2,d2=pow(u)+1;r.max=r.hp=d1+d2;
+  B.units.push(r);
+  B.log='Учебный бой. Терминал подскажет, что делать.';
+  renderBattle();runFight();
+}
+function tutorMosq(){
+  let c=[[4,6],[3,6],[5,6],[4,7],[5,5]].find(([x,y])=>!unitAt(x,y)&&!B.rocks.has(key(x,y)));
+  if(!c)return;
+  const m=mkUnit('mosq','foe','mosq');m.x=c[0];m.y=c[1];B.units.push(m);addDom(m);B.queue.push(m);
+  flt(m,'комар!','big');logMsg('Прилетел комар!');
+}
+
+/* ---------- Шаги ---------- */
+const ownBlood=()=>{const p=G.pets[0];return p&&OWN_BLOOD[p.race]?` Своя кровь: ${RACES[p.race].name.toLowerCase()} — ${SPECIES[OWN_BLOOD[p.race]].name.toLowerCase()}.`:''};
+const TSTEPS=[
+  /* Бой, первый раунд */
+  {id:'b-intro',scr:'v-battle',when:()=>bIn(1),skip:()=>past(1),tgt:'#board',
+   t:()=>`Учебный бой на заднем дворе. Внизу ${esc(tPet().name)}, наверху таракан-переросток. Подсказывать буду на каждом шаге.`},
+  {id:'b-queue',scr:'v-battle',when:()=>bIn(1),skip:()=>past(1),tgt:'#queue',
+   t:'Очередь ходов. Первым ходит тот, у кого выше инициатива. Сейчас ход твоего зверя, он слева.'},
+  {id:'b-who',scr:'v-battle',when:()=>bIn(1),skip:()=>past(1),tgt:'#panel .p-who',
+   t:()=>`Имя и ОЗ. Жёлтые кружки — запал: он тратится на приёмы и копится каждый ход, по ${tPet().mpReg}.`},
+  {id:'b-tap',scr:'v-battle',when:()=>bIn(1),skip:()=>past(1),tgt:()=>uCell(tRoach()),on:'b:info',
+   t:'Ткни в таракана: терминал расскажет о любом звере на поле.'},
+  {id:'b-info',scr:'v-battle',when:()=>bIn(1),skip:()=>past(1),tgt:'#plog',
+   t:()=>`Вот его ОЗ, атака, ход и инициатива. У таракана инициатива 4, у тебя ${tPet().init}, поэтому ты ходишь раньше.`},
+  {id:'b-barrel',scr:'v-battle',when:()=>bIn(1),skip:()=>past(1)||!tBarrel(),tgt:()=>uCell(tBarrel()),
+   t:'Бочка дихлофоса. Рвётся от удара или толчка: 3 урона всем вокруг и облако газа. Можно подорвать врага, только сам рядом не стой.'},
+  {id:'b-pool',scr:'v-battle',when:()=>bIn(1),skip:()=>past(1),tgt:()=>cellRect(0,6),
+   t:'Ядовитая лужа. Кто наступит, отравится и наберёт токсинов. Обходи.'},
+  {id:'b-move',scr:'v-battle',when:()=>bIn(1),skip:()=>past(1)||(bIn(1)&&B.input.moved),on:'b:move',
+   tgt:()=>{const c=tMove1();return c&&cellRect(c.x,c.y)},
+   t:()=>'За ход можно шагнуть, ударить и потратить запал, в любом порядке. Жёлтые точки: куда можно пойти. '+(tRanged()?'Верблюд плюётся на 4 клетки, вплотную подходить незачем. Встань на подсвеченную клетку.':'Подойди к таракану: ткни в подсвеченную клетку.')},
+  {id:'b-hit',scr:'v-battle',when:()=>bIn(1),skip:()=>past(1)||!tRoach()||(bIn(1)&&B.input.hit),tgt:()=>uCell(tRoach()),on:'b:hit',
+   t:()=>`Красный круг — цель, цифра — сколько снимешь. Таракан в этом раунде ещё не ходил, поэтому удар на опережение даёт +1. ${tRanged()?'Плюй':'Бей'}.`},
+  {id:'b-abil',scr:'v-battle',when:()=>bIn(1),skip:()=>{if(past(1)||!tRoach())return true;const u=tPet(),a=u&&u.abil.find(x=>x.id===tAbil());return bIn(1)&&!(a&&usable(u,a))},
+   tgt:()=>`#panel [data-m="${tAbil()}"]`,on:'act:bmode',
+   t:()=>`Удар не заканчивает ход. Остался запал. Выбери приём «${ABIL[tAbil()].name}», он стоит ${abilCost(tPet(),tAbil())}.`},
+  {id:'b-abil2',scr:'v-battle',when:()=>bIn(1)&&B.input.mode===tAbil(),skip:()=>past(1)||!tRoach(),tgt:()=>uCell(tRoach()),on:'b:abil',
+   t:()=>tRanged()?'Плюнь таракану в глаза: два хода он будет мазать через раз.':'За тараканом ящик. Толкни его: удар о препятствие снимет ещё 2 ОЗ.'},
+  {id:'b-end',scr:'v-battle',when:()=>bIn(1),skip:()=>past(1),tgt:'#panel [data-act="bend"]',on:'act:bend',
+   t:'Делать больше нечего. Нажми «Конец хода», и таракан походит. Когда делать совсем нечего, ход кончается сам.'},
+  /* Второй раунд */
+  {id:'b2-hp',scr:'v-battle',when:()=>bIn(2),skip:()=>past(2),tgt:()=>uCell(tPet()),
+   t:()=>{const u=tPet();return `${u.hp<u.max?'Таракан укусил в ответ.':'Таракан промахнулся.'} Полоска под зверем — его ОЗ. Упадут до нуля, и зверь выбывает из боя, получает травму навсегда и может погибнуть.`}},
+  {id:'b2-mosq',scr:'v-battle',when:()=>bIn(2),skip:()=>past(2)||!tMosq(),tgt:()=>uCell(tMosq()),
+   t:'Прилетел комар! В его крови вымерший зверь. Поймаешь — унесёшь домой. Ударишь — кровь пропадёт. Комары прилетают редко, один-два за уровень.'},
+  {id:'b2-kill',scr:'v-battle',when:()=>bIn(2),skip:()=>past(2)||!tRoach()||(bIn(2)&&B.input.hit),tgt:()=>uCell(tRoach()),on:'b:hit',
+   t:'Сначала добей таракана. Он снова не успел походить, так что +1 сработает.'},
+  {id:'b2-walk',scr:'v-battle',when:()=>bIn(2)&&!tRoach(),skip:()=>past(2)||(bIn(2)&&!tRoach()&&!tMove2()),on:'b:move',
+   tgt:()=>{const c=tMove2();return c&&cellRect(c.x,c.y)},
+   t:'Готов! Комара ловят вместо удара, а удар уже был. Зато шагнуть ещё можно: встань рядом с комаром. На клетке бутылка чистой воды, подберёшь по пути.'},
+  {id:'b2-end',scr:'v-battle',when:()=>bIn(2)&&!tRoach(),skip:()=>past(2),tgt:'#panel [data-act="bend"]',on:'act:bend',
+   t:'Теперь «Конец хода». Комар никуда не денется.'},
+  /* Третий раунд: поймать */
+  {id:'b3-walk',scr:'v-battle',when:()=>bIn()&&B.round>=3&&!!tMosq(),skip:()=>bIn()&&B.round>=3&&(B.input.nets.length>0||!tMove2()),on:'b:move',
+   tgt:()=>{const c=tMove2();return c&&cellRect(c.x,c.y)},t:'Подойди к комару вплотную.'},
+  {id:'b3-catch',scr:'v-battle',when:()=>bIn()&&B.round>=3&&!!tMosq()&&B.input.nets.length>0,tgt:()=>uCell(tMosq()),on:['b:catch','act:bnet'],
+   t:'Лови: ткни в комара.'},
+  /* Новый уровень и добыча */
+  {id:'l-up',scr:'v-pick',when:()=>!!$('#v-pick .perk'),tgt:'#v-pick .big-t',
+   t:()=>`Победа! Опыт за бой поднял уровень. Растут показатели, а главное: на 2-м уровне ${esc(G.pets[0].name)} переносит две мутации без перегруза.`},
+  {id:'l-pick',scr:'v-pick',when:()=>!!$('#v-pick .perk'),tgt:'#v-pick .perk',on:'res',
+   t:'С каждым уровнем выбираешь одну карту из трёх: обычную, редкую или эпическую. Перебросить карты можно за еду. Выбирай.'},
+  {id:'r-loot',scr:'v-result',tgt:'#v-result .sum',
+   t:'Добыча: комар, еда и вода. Обычный рейд — несколько боёв подряд. Ушёл живым — добыча твоя. Разгром или побег — пропадает всё.'},
+  {id:'r-next',scr:'v-result',tgt:'#v-result [data-res]',on:'res',t:'Неси на базу.'},
+  /* База */
+  {id:'h-food',scr:'v-base',tgt:'#v-base .res .chip:nth-child(1)',
+   t:'Это база. Наверху запасы. Еда: даётся за победы, тратится на новых зверей и на переброс карт.'},
+  {id:'h-water',scr:'v-base',tgt:'#v-base .res .chip:nth-child(2)',t:'Чистая вода. Редкая. Каждая бутылка снимает 15 токсинов.'},
+  {id:'h-mosq',scr:'v-base',tgt:'#v-base .res .chip:nth-child(3)',
+   t:'Комары в банке. Один комар — одна мутация. Один ждал в банке, второго ты поймал.'},
+  {id:'h-pet',scr:'v-base',tgt:'#v-base .tag',on:'act:pet',t:'Это твой зверь. Ткни в карточку.'},
+  {id:'h-stats',scr:'v-base',sheet:true,tgt:'#sheet .statgrid',
+   t:'ОЗ — здоровье. АТК — урон. ХОД — сколько клеток за ход. ИНИЦ — место в очереди. ДАЛЬ — дальность удара.'},
+  {id:'h-lvl',scr:'v-base',sheet:true,tgt:'#sheet .lvlb',
+   t:'Уровень и опыт. Справа — сколько мутаций зверь переносит. Каждая лишняя повышает риск смерти при укусе.'},
+  {id:'h-tox',scr:'v-base',sheet:true,tgt:'#sheet [data-act="water"]',
+   t:'Токсины копятся от укусов, луж и газа. Выше 30 укус может свести зверя с ума, от 50 в бою бывают приступы. Вода снимает 15.'},
+  {id:'h-abil',scr:'v-base',sheet:true,tgt:'#sheet .abl',t:'Приёмы и их цена в запале. Новые приёмы и карты приносит уровень.'},
+  {id:'h-close',scr:'v-base',sheet:true,tgt:'#sheet [data-act="closeSheet"]',on:'act:closeSheet',t:'Закрой карточку.'},
+  {id:'h-cage',scr:'v-base',tgt:'#v-base [data-act="cage"]',
+   t:'Клетка: новый случайный зверь за еду. В рейд идёт отряд, а запасные выручат, если кто-то погибнет.'},
+  {id:'h-codex',scr:'v-base',tgt:'#v-base [data-act="codex"]',t:'Кодекс: всё, что ты открыл. Скоро там будет что показать.'},
+  {id:'h-grave',scr:'v-base',tgt:'#v-base [data-act="grave"]',t:'Кладбище. Погибший зверь может оставить свою лучшую мутацию другому.'},
+  {id:'h-rules',scr:'v-base',tgt:'#v-base [data-act="rules"]',t:'Правила коротко. Там же можно пройти обучение ещё раз.'},
+  {id:'h-raid',scr:'v-base',tgt:'#v-base [data-act="raid"]',
+   t:'В рейд: уровень, отряд и несколько боёв. Между боями бывают события. За первое прохождение уровня — награда.'},
+  {id:'h-lab',scr:'v-base',tgt:'#v-base [data-act="lab"]',on:'act:lab',t:'А теперь мутации. Нажми «Микроскоп».'},
+  /* Микроскоп и квиз */
+  {id:'m-blood',scr:'v-lab',when:()=>!!$('#v-lab .reveal'),tgt:'#v-lab .reveal',
+   t:'В этом комаре кровь моллюска: хитрая, со странными приёмами. Какая кровь, видно заранее. Какая мутация выпадет внутри неё, решает случай.'},
+  {id:'m-theme',scr:'v-lab',when:()=>!!$('#v-lab .reveal'),tgt:'#v-lab .seg',
+   t:'Чтобы очистить кровь, ответь на 5 вопросов. Тема любая, тема дня даёт +15% чистоты.'},
+  {id:'m-tier',scr:'v-lab',when:()=>!!$('#v-lab .reveal'),tgt:'#v-lab .tier[data-t="1"]',on:'act:tier',
+   t:'Сложность. Чем сложнее квиз, тем чаще редкие мутации, но и риск выше. Для начала лёгкий: хватит 2 верных из 5.'},
+  {id:'q-intro',scr:'v-quiz',when:()=>!!(Q&&Q.i===0&&!Q.answered),tgt:'#v-quiz .qtxt',
+   t:'Отвечай. В обучении таймера нет, в игре на ответ 25 секунд. После ответа терминал объяснит, как на самом деле.'},
+  {id:'q-res',scr:'v-quiz',when:()=>!Q&&!!$('#v-quiz .big-t'),tgt:'#v-quiz .big-t',
+   t:'Чистота — доля верных ответов. Чем чище кровь, тем меньше токсинов и ниже риск при укусе.'},
+  {id:'q-go',scr:'v-quiz',when:()=>!Q&&!!$('#v-quiz [data-act="lab"]'),tgt:'#v-quiz [data-act="lab"]',on:'act:lab',t:'Теперь выбери, кого кусать.'},
+  /* Первый укус */
+  {id:'k-risk',scr:'v-lab',when:()=>!!$('#v-lab .bite-card'),tgt:'#v-lab .risk',
+   t:'Перед укусом видны риски: смерть, психоз и сколько станет токсинов. Учебные комары безопасны, в игре риск настоящий.'},
+  {id:'k-rel',scr:'v-lab',when:()=>!!$('#v-lab .bite-card'),tgt:()=>$('#v-lab .rel-good,#v-lab .rel-bad')||$('#v-lab .risk'),
+   t:()=>$('#v-lab .rel-good')?'Видишь «Родство»? Эта кровь близка твоему зверю: токсинов будет меньше. Бывает и «Конфликт», тогда больше.':'Если кровь близка зверю, здесь появится «Родство»: токсинов меньше. «Конфликт» — наоборот. С этой кровью ни того, ни другого.'},
+  {id:'k-bite',scr:'v-lab',when:()=>!!$('#v-lab .bite-card'),tgt:'#v-lab .bite-card .tag',on:'act:bite',t:'Ткни в зверя, чтобы выпустить на него комара.'},
+  {id:'k-mut',scr:'v-lab',when:()=>!!$('#v-lab .card h2'),tgt:()=>$('#v-lab .card'),
+   t:'Нога улитки, обычная мутация. Зелёное — плюс, красное — минус: капканы не страшны, зато ход на 1 короче. Мутации бывают обычные, редкие и эпические, и каждую видно на звере.'},
+  {id:'k-home',scr:'v-lab',when:()=>!!$('#v-lab .card h2'),tgt:'#v-lab [data-act="home"]',on:'act:home',t:'Возвращайся на базу.'},
+  /* Второй комар: как выбрать, кого кусать */
+  {id:'h2-lab',scr:'v-base',tgt:'#v-base [data-act="lab"]',on:'act:lab',t:'Остался второй комар. В обучении его кровь терминал очистит сам.'},
+  {id:'k2-blood',scr:'v-lab',when:()=>!!$('#v-lab .bite-card'),tgt:'#v-lab h2',t:'Кровь чудака. Как понять, кому её давать?'},
+  {id:'k2-how',scr:'v-lab',when:()=>!!$('#v-lab .bite-card'),tgt:'#v-lab .risk',
+   t:'Смотри на три вещи. Риски и токсины — здесь. Лимит мутаций: перегруз опасен. И Кодекс: там подсказки, кому не хватает части сочетания и какой для неё нужна кровь.'},
+  {id:'k2-form',scr:'v-lab',when:()=>!!$('#v-lab .bite-card'),
+   t:()=>'И ещё: две мутации одной чужой крови перестраивают зверя в новый вид. Своя кровь этого не делает.'+ownBlood()},
+  {id:'k2-bite',scr:'v-lab',when:()=>!!$('#v-lab .bite-card'),tgt:'#v-lab .bite-card .tag',on:'act:bite',t:'Кусаем.'},
+  {id:'k2-mut',scr:'v-lab',when:()=>!!$('#v-lab .card h2'),tgt:()=>$('#v-lab .card'),t:'Перепончатые лапы: +1 ход, лужи не вредят.'},
+  {id:'k2-combo',scr:'v-lab',when:()=>!!$('#v-lab .card.sup'),skip:()=>current==='v-lab'&&!!$('#v-lab .card h2')&&!$('#v-lab .card.sup'),tgt:'#v-lab .card.sup',
+   t:'Скрытое сочетание! Нога улитки и перепонки срослись в ласты: минус улитки пропал, зато за зверем остаются лужи. У каждого сочетания свой плюс и минус. Бывают обычные, редкие, эпические и легендарные.'},
+  {id:'k2-home',scr:'v-lab',when:()=>!!$('#v-lab .card h2'),tgt:'#v-lab [data-act="home"]',on:'act:home',t:'На базу.'},
+  /* Кодекс */
+  {id:'c-open',scr:'v-base',tgt:'#v-base [data-act="codex"]',on:'act:codex',t:'Загляни в Кодекс.'},
+  {id:'c-tiers',scr:'v-base',sheet:true,tgt:'#sheet .ctierh.ct1',t:'Скрытые сочетания по редкости. Всё открытое записывается сюда навсегда.'},
+  {id:'c-hint',scr:'v-base',sheet:true,skip:()=>!$('#sheet').hidden&&!$('#sheet .mline.hint'),tgt:()=>$('#sheet .mline.hint'),
+   t:'Подсказка: у зверя уже есть часть сочетания. Знаки вопроса — чего не хватает, в скобках — какая нужна кровь. По подсказкам и решают, кому давать комара.'},
+  {id:'c-forms',scr:'v-base',sheet:true,tgt:'#sheet .formsh',t:'Новые виды: звери, перестроенные чужой кровью.'},
+  {id:'c-blood',scr:'v-base',sheet:true,tgt:()=>$('#sheet .bloodh'),t:'Ниже все мутации по крови. Неоткрытые скрыты, но видно, сколько их и какой они редкости.'},
+  {id:'c-close',scr:'v-base',sheet:true,tgt:'#sheet [data-act="closeSheet"]',on:'act:closeSheet',t:'Закрой Кодекс.'},
+  {id:'e-done',scr:'v-base',tgt:'#v-base [data-act="raid"]',last:true,
+   t:()=>{const p=G.pets[0],full=p&&p.muts.length>=mutCap(p.lvl);return `Обучение пройдено.${full?` У твоего зверя уже ${p.muts.length} мутации из ${mutCap(p.lvl)}: следующего комара дай новому зверю из клетки или дождись 4-го уровня.`:''} Дальше сам: первый уровень — Двор лаборатории. Терминал почти в тебя верит.`}},
+];
+const TIX=Object.fromEntries(TSTEPS.map((s,i)=>[s.id,i]));
+
+/* ---------- Подсветка ---------- */
+const Coach={
+  raf:0,shown:'',
+  init(){
+    const app=$('#app');if(!app||$('#coach'))return;
+    const d=document.createElement('div');d.id='coach';d.hidden=true;
+    d.innerHTML='<i class="ck-blk"></i><i class="ck-blk"></i><i class="ck-blk"></i><i class="ck-blk"></i><div class="ck-hole"></div><div class="ck-bub" role="dialog" aria-live="polite"></div>';
+    app.appendChild(d);
+    new MutationObserver(ms=>{if(ms.some(m=>!d.contains(m.target)))this.sync()}).observe(app,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden']});
+    window.addEventListener('resize',()=>this.sync());
+  },
+  step(){return G.tutor?TSTEPS[TIX[G.tutor.at]]:null},
+  ready(s){
+    if(s.scr&&current!==s.scr)return false;
+    const sh=$('#sheet'),open=!!(sh&&!sh.hidden);
+    if(!!s.sheet!==open)return false;
+    try{return!s.when||!!s.when()}catch(e){return false}
+  },
+  want(e){const s=this.step();return!!(s&&s.on&&[].concat(s.on).includes(e)&&this.ready(s))},
+  go(id){if(G.tutor){G.tutor.at=id;save()}this.shown='';this.sync()},
+  adv(){const n=TSTEPS[TIX[G.tutor.at]+1];if(n)this.go(n.id);else finishTutor()},
+  on(e){if(G.tutor&&this.want(e))this.adv()},
+  next(){const s=this.step();if(!s)return;if(s.last)finishTutor();else this.adv()},
+  sync(){if(!this.raf)this.raf=requestAnimationFrame(()=>{this.raf=0;this.draw()})},
+  inView(el){const sc=el.closest('.scroll');if(!sc)return true;const a=el.getBoundingClientRect(),b=sc.getBoundingClientRect();return a.top>=b.top-1&&a.bottom<=b.bottom+1},
+  draw(){
+    const box=$('#coach');if(!box)return;
+    let s=this.step(),guard=0;
+    while(s&&s.skip&&guard++<30){let k=false;try{k=!!s.skip()}catch(e){}if(!k)break;const n=TSTEPS[TIX[s.id]+1];if(!n){s=null;break}G.tutor.at=n.id;s=n}
+    if(!s||!this.ready(s)){box.hidden=true;return}
+    let tg=s.tgt;try{tg=typeof tg==='function'?tg():tg}catch(e){tg=null}
+    let els=[];
+    if(typeof tg==='string')els=[...document.querySelectorAll(tg)].filter(e=>e.getClientRects().length);
+    else if(tg instanceof Element)els=[tg];
+    else if(tg&&tg.width!=null)els=[tg];
+    const first=els.find(e=>e instanceof Element);
+    if(first&&!this.inView(first))first.scrollIntoView({block:'center'});
+    let r=null;
+    els.forEach(e=>{const q=e instanceof Element?e.getBoundingClientRect():e,R2={l:q.left,t:q.top,r:q.left+q.width,b:q.top+q.height};r=r?{l:Math.min(r.l,R2.l),t:Math.min(r.t,R2.t),r:Math.max(r.r,R2.r),b:Math.max(r.b,R2.b)}:R2});
+    const A=$('#app').getBoundingClientRect(),AW=A.width,AH=A.height,pad=5;
+    const h=r&&{l:Math.max(2,r.l-A.left-pad),t:Math.max(2,r.t-A.top-pad),r:Math.min(AW-2,r.r-A.left+pad),b:Math.min(AH-2,r.b-A.top+pad)};
+    const act=!!s.on&&!!h,lost=!!s.on&&!h;
+    box.hidden=false;box.classList.toggle('nohole',!h);
+    const hole=box.querySelector('.ck-hole'),blk=box.querySelectorAll('.ck-blk'),bub=box.querySelector('.ck-bub');
+    if(h)Object.assign(hole.style,{left:h.l+'px',top:h.t+'px',width:(h.r-h.l)+'px',height:(h.b-h.t)+'px'});
+    const place=(el,x,y,w,hh)=>Object.assign(el.style,{left:x+'px',top:y+'px',width:Math.max(0,w)+'px',height:Math.max(0,hh)+'px'});
+    if(act){place(blk[0],0,0,AW,h.t);place(blk[1],0,h.b,AW,AH-h.b);place(blk[2],0,h.t,h.l,h.b-h.t);place(blk[3],h.r,h.t,AW-h.r,h.b-h.t)}
+    else{place(blk[0],0,0,AW,AH);[1,2,3].forEach(i=>place(blk[i],0,0,0,0))}
+    const sig=s.id+(lost?'!':'');
+    if(this.shown!==sig){
+      this.shown=sig;
+      const txt=typeof s.t==='function'?s.t():s.t;
+      bub.innerHTML=`<p class="ck-t">${txt}</p><div class="ck-row"><button class="ck-skip" data-act="coachSkip">Пропустить обучение</button>${!s.on||lost?`<button class="btn main ck-go" data-act="coachNext">${s.last?'Готово':'Дальше'}</button>`:''}</div>`;
+    }
+    const bh=bub.offsetHeight,m=10;let top;
+    if(!h)top=Math.max(m,(AH-bh)/2);
+    else{
+      const above=h.t,below=AH-h.b;
+      if(below>=bh+2*m&&(below>=above||above<bh+2*m))top=h.b+m;
+      else if(above>=bh+2*m)top=h.t-bh-m;
+      else top=below>above?AH-bh-m:m;
+    }
+    bub.style.top=clamp(top,m,Math.max(m,AH-bh-m))+'px';
+  },
+};
+
+/* ---------- Начало, пропуск, конец ---------- */
+function startTutor(p){
+  G.tutDone=true;G.tutor={at:TSTEPS[0].id,bit:0};save();
+  Coach.shown='';startTutorFight();
+}
+/* Без обучения: то же, что даёт обучение. Второй уровень и два обычных комара */
+async function quickStart(p){
+  G.tutDone=true;G.mosq=2;p.lvl=2;p.xp=0;save();
+  await levelUpScreen(p,2,false);
+  save();renderBase();
+}
+function beginGame(race){
+  const p=makePet(race);G.pets.push(p);
+  if(tutWanted())startTutor(p);else quickStart(p);
+}
+async function skipTutor(){
+  const T=G.tutor;if(!T)return;
+  clearInterval(qTimer);Q=null;closeSheet();
+  if(G.sandbox){pendingRes=null;B=null;R=null;G=REAL;REAL=null;Coach.sync();goHome();toast('Ты снова в своей игре.');return}
+  G.tutor=null;Coach.sync();
+  /* Бой уже выигран: экраны уровня и добычи сами дойдут до базы */
+  if(R&&R.tutor&&(!B||B.over)){save();return}
+  B=null;R=null;pendingRes=null;
+  G.slide=null;G.pending=null;G.mosq=Math.max(0,2-(T.bit||0));
+  const p=G.pets[0];
+  if(p&&p.lvl<2){p.lvl=2;p.xp=0;save();await levelUpScreen(p,2,false)}
+  save();goHome();
+}
+function finishTutor(){
+  const sb=G.sandbox;
+  if(sb){G=REAL;REAL=null}else{G.tutor=null;save()}
+  Coach.shown='';closeSheet();goHome();Coach.sync();
+  if(sb)toast('Обучение пройдено. Это снова твоя игра.');
+}
+/* Повтор из правил: своя игра откладывается в сторону и не сохраняется, пока идёт обучение */
+function tutorAgain(){
+  if(G.tutor||B||R)return;
+  REAL=G;G={...NEW(),sandbox:true};closeSheet();renderStart();
+}
+/* После перезагрузки: бой начинается заново, остальное с ближайшего понятного места */
+function tutorResume(){
+  const T=G.tutor,p=G.pets[0];
+  if(!p){G.tutor=null;return goHome()}
+  if(p.lvl<2){T.at=TSTEPS[0].id;save();return startTutorFight()}
+  const bit=T.bit||0;let at=TIX[T.at];if(at==null)at=TIX['h-food'];
+  G.mosq=Math.max(0,2-bit-(G.slide?1:0)-(G.pending?1:0));
+  let id=TSTEPS[at].id;
+  if(at<TIX['h-food'])id='h-food';
+  else if(at<TIX['h-lab']){if(TSTEPS[at].sheet)id='h-pet'}
+  else if(at<TIX['h2-lab'])id=bit>=1?'h2-lab':G.pending?'k-risk':G.slide?'m-blood':'h-lab';
+  else if(at<TIX['c-open'])id=bit>=2?'c-open':G.pending?'k2-blood':'h2-lab';
+  else if(TSTEPS[at].sheet)id='c-open';
+  T.at=id;save();Coach.shown='';
+  if(id==='m-blood')openLab();
+  else if(id==='k-risk'||id==='k2-blood')renderBite();
+  else goHome();
+}
+
 /* ---------- Кнопки ---------- */
 function twoTap(el,label,fn){
   if(el.dataset.armed){fn();return}
@@ -3635,7 +4077,11 @@ function twoTap(el,label,fn){
   setTimeout(()=>{if(el.isConnected){delete el.dataset.armed;el.textContent=old}},2500);
 }
 const ACT={
-  startWith:d=>{const p=makePet(d.race);G.pets.push(p);save();renderBase()},
+  startWith:d=>beginGame(d.race),
+  tutToggle:()=>{try{localStorage.setItem(TUT_KEY,tutWanted()?'1':'0')}catch(e){}renderStart()},
+  tutAgain:tutorAgain,
+  coachNext:()=>Coach.next(),
+  coachSkip:(d,el)=>twoTap(el,'Точно пропустить?',skipTutor),
   pet:d=>openPet(d.id),
   closeSheet,
   water:d=>{const p=getPet(d.id);if(p&&G.water>0&&p.tox>0){G.water--;p.tox=Math.max(0,p.tox-WATER);save();renderBase();openPet(d.id)}},
@@ -3649,7 +4095,7 @@ const ACT={
   answer:d=>answer(+d.i),nextq:nextQ,
   bite:d=>{const p=getPet(d.id);if(p&&G.pending)doBite(p)},
   dump:(d,el)=>twoTap(el,'Точно выбросить?',()=>{G.pending=null;save();goHome()}),
-  reset:(d,el)=>twoTap(el,'Точно стереть всё?',()=>{G=NEW();save();closeSheet();renderStart()}),
+  reset:(d,el)=>twoTap(el,'Точно стереть всё?',()=>{if(G.sandbox||G.tutor)return;G=NEW();save();closeSheet();renderStart()}),
   lvl:d=>{SETUP.lvl=+d.i;SETUP.fresh=false;const s=document.querySelector('#v-raid .scroll'),top=s?s.scrollTop:0;renderRaid();const n=document.querySelector('#v-raid .scroll');if(n)n.scrollTop=top},
   squad:d=>toggleSquad(d.id),
   go:startRaid,
@@ -3660,9 +4106,9 @@ const ACT={
 };
 document.addEventListener('click',e=>{
   const res=e.target.closest('[data-res]');
-  if(res&&pendingRes){const f=pendingRes;pendingRes=null;f(res.dataset.res);return}
+  if(res&&pendingRes){Coach.on('res');const f=pendingRes;pendingRes=null;f(res.dataset.res);return}
   const a=e.target.closest('[data-act]');
-  if(a&&!a.disabled){const fn=ACT[a.dataset.act];if(fn)fn(a.dataset,a);return}
+  if(a&&!a.disabled){const fn=ACT[a.dataset.act];if(fn){Coach.on('act:'+a.dataset.act);fn(a.dataset,a)}return}
   const hl=e.target.closest('.hl');
   if(hl){onCell(+hl.dataset.x,+hl.dataset.y);return}
   const board=e.target.closest('#board');
@@ -3680,7 +4126,8 @@ function start(data){
   const saved=data&&data.G?{...NEW(),...data.G}:loadLocal();
   if(saved)G=saved;
   if(window.claude&&window.claude.hot&&window.claude.hot.snapshot)window.claude.hot.snapshot(()=>({G}));
-  goHome();
+  Coach.init();
+  if(G.tutor)tutorResume();else goHome();
   cloudInit();
 }
 if(window.claude&&window.claude.hot&&window.claude.hot.ready)window.claude.hot.ready(start);
